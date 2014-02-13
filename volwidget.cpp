@@ -76,6 +76,7 @@ void volWidget::paintGL(void) {
 
     glClearColor(0.0,0.0,0.0,1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    cout << this->width() << "w | " << this->height() << "h" << endl;
     draw();
     //glfwSwapBuffers();
     //double currentTime = glfwGetTime();
@@ -108,8 +109,15 @@ void volWidget::draw(void)
     //shader->setUniform("lightViewMatrix",lightViewMatrix.data(),3,GL_FALSE,1);
     errorCheckFunc(__FILE__, __LINE__);
 
+
+    //Eigen::Vector2i viewportSize;
+    //viewportSize << this->width(), this->height();
+
+    //shader->setUniform("viewportSize", &viewportSize[0], 2, 1);
+
     //Mesh Rendering:
     mesh->render();
+    cout << "Mesh rendered" << endl;
 
     shader->disable();
 
