@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     $$SHADERLIB_PATH/src/textureManager.cpp \
     $$SHADERLIB_PATH/src/mesh.cpp \
     ../../resources/shader-lib/src/trackball.cpp \
-    volwidget.cpp
+    volwidget.cpp \
+    volume.cpp
 
 HEADERS  += mainwindow.h \
     $$SHADERLIB_PATH/include/shader.hpp \
@@ -44,7 +45,8 @@ HEADERS  += mainwindow.h \
     ../../resources/shader-lib/include/trackball.hpp \
     ../../resources/shader-lib/include/textureManager.hpp \
     ../../resources/shader-lib/include/texture.hpp \
-    volwidget.h
+    volwidget.h \
+    volume.h
 
 FORMS    += mainwindow.ui
 

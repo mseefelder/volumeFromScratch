@@ -2,12 +2,13 @@
 #define VOLWIDGET_H
 
 //#include "effect.hpp"
-//#include "volume.hpp"
 
 #include "effect.hpp"
 #include "texture.hpp"
 #include "mesh.hpp"
 #include "trackball.hpp"
+#include "volume.h"
+
 
 #include <QGLWidget>
 
@@ -37,21 +38,14 @@ public:
      * @param potentialImage
      * @param spikeImage
      */
-    void readOutput(QImage &potentialImage, QImage &spikeImage);
-
-    /**
-     * @brief Returns a pointer to the SNN Effect
-     * @return ptr to effect
-     */
-    //SNN* getSNNEffect (void) {
-    //    return snn;
-    //}
 
 signals:
 
 public slots:
 
 private:
+    Volume* volume;
+
     ///Shader
     Shader* shader;
 

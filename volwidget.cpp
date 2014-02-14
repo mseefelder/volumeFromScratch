@@ -2,11 +2,9 @@
 
 volWidget::volWidget(QWidget *parent) : QGLWidget(parent)
 {
-    //cameraTrackball = new Trackball;
-    //lightTrackball = new Trackball;
-    //mesh = new Mesh;
-    //shader = new Shader("shaders/","shader",0);
+
     initializeGL();
+
 }
 
 void volWidget::initializeGL() {
@@ -35,14 +33,13 @@ void volWidget::initializeGL() {
 }
 
 void volWidget::initialize() {
-    /*
-    Volume volume;
-    cout << "Volume created" << endl;
-    */
+
     cameraTrackball = new Trackball;
     lightTrackball = new Trackball;
     mesh = new Mesh;
     shader = new Shader("shaders/","phongShader",0);
+    volume = new Volume;
+    cout << "Volume created" << endl;
 
     //Initializing Matrices
     cameraTrackball->initOpenGLMatrices();
@@ -56,6 +53,8 @@ void volWidget::initialize() {
 
     shader->initialize();
 
+    glViewport(0, 0, this->width(), this->height());
+
     //Trackball Shader generation:
     cameraTrackball->loadShader();
     errorCheckFunc(__FILE__, __LINE__);
@@ -63,24 +62,19 @@ void volWidget::initialize() {
 
 }
 
-void volWidget::readOutput(QImage &potentialImage, QImage &spikeImage) {
-    //snn->writeOutputImages(potentialImage, spikeImage);
-}
-
 void volWidget::paintGL(void) {
-    makeCurrent();
-    //if (snn) {
-    //    snn->render();
-    //}
 
+    makeCurrent();
+    GLint* dims;
+    //glGetIntegerv(GL_MAX_VIEWPORT_DIMS,dims);
+    errorCheckFunc(__FILE__, __LINE__);
 
     glClearColor(0.0,0.0,0.0,1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     cout << this->width() << "w | " << this->height() << "h" << endl;
+    //cout << dims[0] << " " << dims[1] << endl;
+    errorCheckFunc(__FILE__, __LINE__);
     draw();
-    //glfwSwapBuffers();
-    //double currentTime = glfwGetTime();
-    //int fps = 1/(currentTime-oldTime);
 
 }
 
@@ -89,45 +83,19 @@ void volWidget::draw(void)
 
     //The matrices multiplication order is: Projection * View * Model * Vertex.
 
+    //Enable the shader (pretty obvious)
     shader->enable();
 
-    //Define standard color for mesh rendering:
-    //Eigen::Vector4f colorVector;
-    //colorVector << 1.0, 1.0, 1.0, 1.0;
+    GLint texIndex;
+    texIndex = volume->bindTexture();
 
-    //Setting Uniforms:
-    //shader->setUniform("in_Color",colorVector.data(),4,1);
-    errorCheckFunc(__FILE__, __LINE__);
-    //shader->setUniform("projectionMatrix", cameraTrackball->getProjectionMatrix().data(), 4 ,GL_FALSE, 1);
-    errorCheckFunc(__FILE__, __LINE__);
-    //shader->setUniform("modelMatrix",cameraTrackball->getModelMatrix().data(), 4, GL_FALSE, 1);
-    errorCheckFunc(__FILE__, __LINE__);
-    //shader->setUniform("viewMatrix",cameraTrackball->getViewMatrix().data(), 4, GL_FALSE, 1);
-    errorCheckFunc(__FILE__, __LINE__);
-    //Eigen::Matrix3f lightViewMatrix = lightTrackball->getViewMatrix().linear();
-    errorCheckFunc(__FILE__, __LINE__);
-    //shader->setUniform("lightViewMatrix",lightViewMatrix.data(),3,GL_FALSE,1);
-    errorCheckFunc(__FILE__, __LINE__);
-
-
-    //Eigen::Vector2i viewportSize;
-    //viewportSize << this->width(), this->height();
-
-    //shader->setUniform("viewportSize", &viewportSize[0], 2, 1);
+    shader->setUniform("volumeTexture", texIndex);
 
     //Mesh Rendering:
     mesh->render();
     cout << "Mesh rendered" << endl;
 
     shader->disable();
-
-    errorCheckFunc(__FILE__, __LINE__);
-
-    //Drawing the Trackball:
-    //cameraTrackball->render();
-
-    //Draw AntTweakBar menus:
-    //TwDraw();
 
     errorCheckFunc(__FILE__, __LINE__);
 }
