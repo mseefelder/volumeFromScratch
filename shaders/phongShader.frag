@@ -14,16 +14,17 @@ void main(void)
 
         out_Color = vec4(1.0, 1.0, 1.0 ,1.0);
         vec4 acColor = vec4(0.0, 0.0, 0.0, 1.0);
-        //vec3 fronTexCoord = vec3(FragCoord.x)
 
-        //out_Color = vec4(gl_FragCoord.x, gl_FragCoord.y, 0.0 ,1.0);
-/*
+        vec3 coord = gl_FragCoord.xyz/500;
+
         for (int i; i<255; i++){
-            if (acColor.x < 1.0){
-            acColor += texture(Texture, gl_FragCoord.xy/viewportSize).x * vec4(1.0, 0.0, 0.0, 0.0);
-            }
+            float voxelValue;
+            voxelValue = texture(volumeTexture, coord).r;
+            acColor.x = acColor.x + voxelValue/256;
         }
 
+
         out_Color = acColor;
-*/
+
+        //out_Color = vec4(texture(volumeTexture, coord).r, 0.0, 0.0, 1.0);
 }
