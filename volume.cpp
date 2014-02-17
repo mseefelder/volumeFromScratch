@@ -4,8 +4,11 @@
 //{
 //}
 
-Volume::Volume(char* filePath, int* volSize, Eigen::Vector3f dimension){
-    int voxelArraySize = volSize[0]*volSize[1]*volSize[2]*2;
+Volume::Volume(char* filePath, int* vSize, Eigen::Vector3f dimension){
+    cout << "Start" << endl;
+    int voxelArraySize = vSize[0]*vSize[1]*vSize[2]*2;
+    //volSize = new int[3];
+    volSize = vSize;
     voxelArray = new GLubyte[voxelArraySize];
 
     ///Reading the texture file and sorting it in voxelArray
@@ -41,6 +44,7 @@ Volume::Volume(char* filePath, int* volSize, Eigen::Vector3f dimension){
 
 void Volume::loadVolume(){
     cout << "Loading volume..."<<endl;
+    cout << volSize[0] << " " << volSize[1] << " " << volSize[2] << endl;
 
     mesh -> createParallelepiped(realDimension[0], realDimension[1], realDimension[1]);
 
@@ -48,8 +52,10 @@ void Volume::loadVolume(){
 
     texture = new Texture();
     cout << "Texture instantiated." << endl;
-    Id = texture->create(GL_TEXTURE_3D, GL_R8, XSIZE, YSIZE, GL_RED, GL_UNSIGNED_BYTE, voxelArray, ZSIZE); // "Id =" because...
+    errorCheckFunc(__FILE__, __LINE__);
+    Id = texture->create(GL_TEXTURE_3D, GL_R8, volSize[0], volSize[1], GL_RED, GL_UNSIGNED_BYTE, voxelArray, volSize[2]); // "Id =" because...
                                                         //...this funcion returns a GLuint value that represents the texture ID.
+    errorCheckFunc(__FILE__, __LINE__);
     cout << "Texture created." << endl;
     texture->setTexParameters(GL_CLAMP, GL_CLAMP, GL_CLAMP, GL_LINEAR, GL_LINEAR);
     cout << "Texture parameters set." << endl;

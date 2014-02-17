@@ -34,6 +34,9 @@ public:
 //        }
 //        errorCheckFunc(__FILE__, __LINE__);
 
+        volSize = new int[3];
+        volSize[0] = XSIZE; volSize[1] = YSIZE; volSize[2] = ZSIZE;
+
         ///Setting up the
         int voxelArraySize = XSIZE*YSIZE*ZSIZE*2;
         voxelArray = new GLubyte[voxelArraySize];
@@ -80,7 +83,7 @@ public:
       @param Integer vector with x,y,z resolution of the 3D texture
       @param Eigen::Vector3f with volume dimensions in "real world"
     **/
-    Volume(char* filePath, int* volSize, Eigen::Vector3f dimension);
+    Volume(char* filePath, int* vSize, Eigen::Vector3f dimension);
 
     /**
       @brief Creates the volume container (parallelepiped) and the GL_TEXTURE_3D
@@ -100,6 +103,13 @@ public:
         return Id;
     }
 
+    /**
+      @brief Returns number of layers of the 3D texture
+    **/
+    int getTextureDepth() {
+        return volSize[2];
+    }
+
     //Volume(string fileName){}
 
     virtual ~Volume() {}
@@ -107,6 +117,9 @@ public:
 private:
     ///Array to store the bytes that describe the voxels:
     GLubyte* voxelArray;
+
+    ///Vector with x,y,z resolution of the 3D texture:
+    int* volSize;
 
     ///The mesh:
     Mesh* mesh;

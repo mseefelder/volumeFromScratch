@@ -34,17 +34,24 @@ public:
     virtual void paintGL();
 
     /**
-     * @brief Reads the iteration result and writes to a QImage
-     * @param potentialImage
-     * @param spikeImage
+     * @brief Initializes the transfer function
      */
+    void volWidget::initializeTransferFunction();
 
 signals:
 
 public slots:
 
 private:
+    //The volume we're working with
     Volume* volume;
+
+    //Transfer Function
+    Texture* transferFunction;
+
+    //Index of transfer Function
+    GLuint TFuid;
+    GLint TFid;
 
     ///Shader
     Shader* shader;
