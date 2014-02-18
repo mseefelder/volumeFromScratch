@@ -80,6 +80,15 @@ void volWidget::initialize() {
 
     //Trackball Shader generation:
     cameraTrackball->loadShader();
+
+    //The maximum parallellepiped diagonal
+    volDiagonal = volume->getDiagonal();
+
+    //The unit vectors:
+    uX << 1.0, 0.0, 0.0;
+    uY << 0.0, 1.0, 0.0;
+    uZ << 0.0, 0.0, 1.0;
+
     errorCheckFunc(__FILE__, __LINE__);
 
 
@@ -147,14 +156,25 @@ void volWidget::draw(void)
     shader->enable();
 
     //Prepare the uniforms
+
+    //Texture stuff
     GLint texIndex;
     texIndex = volume->bindTexture();
     TFid = transferFunction->bind();
+
+    //stuff to calculate the positions
+
 
     //Set the uniforms
     shader->setUniform("volumeTexture", texIndex);
     shader->setUniform("transferFunction", TFid);
     shader->setUniform("textureDepth", volume->getTextureDepth());
+
+    //shader->setUniform("diagonal", volDiagonal);
+    //shader->setUniform("uX", uX);
+    //shader->setUniform("uY", uY);
+    //shader->setUniform("uZ", uZ);
+    ///shader->
 
     //Mesh Rendering:
     mesh->render();
@@ -169,5 +189,12 @@ void volWidget::mouseMoveEvent(QMouseEvent *){
 
         cout<<"inside"<< ins << endl;
         ins += 1;
+
+}
+
+void volWidget::updateRendPlane(){
+    //Eigen::Vector3f cameraPos;
+    //cameraPos = cameraTrackball->getCenter();
+    //rendPlaneCenter = volDiagonal*(cameraPos/Eigen::VectorwiseOp::norm(cameraPos));
 
 }

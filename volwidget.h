@@ -58,6 +58,12 @@ private:
     GLuint TFuid;
     GLint TFid;
 
+    //The unit vectors
+    Eigen::Vector3f uX, uY, uZ;
+
+    //The volume container diagonal size
+    float volDiagonal;
+
     ///Shader
     Shader* shader;
 
@@ -81,6 +87,11 @@ private:
 
     ///Current Viewport Position in Y axis in pixels.
     int currentPosY;
+
+    ///Render plane center. Has to be updated everytime the camera moves
+    Eigen::Vector3f rendPlaneCenter;
+
+    void updateRendPlane();
 
     void draw(void);
 

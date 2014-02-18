@@ -104,6 +104,11 @@ public:
     }
 
     /**
+      @brief Returns the maximum daigonal of the parallellepiped containing the volume
+    **/
+    float getDiagonal();
+
+    /**
       @brief Returns number of layers of the 3D texture
     **/
     int getTextureDepth() {

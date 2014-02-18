@@ -66,3 +66,9 @@ void Volume::loadVolume(){
 int Volume::bindTexture(){
     return texture->bind();
 }
+
+float Volume::getDiagonal(){
+    float diagonal;
+    diagonal = sqrt(pow(realDimension[0], 2) + pow(realDimension[1], 2) + pow(realDimension[2], 2));
+    return diagonal;
+}

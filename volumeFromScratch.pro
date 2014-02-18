@@ -4,11 +4,11 @@
 #
 #-------------------------------------------------
 
-EIGEN_PATH  = ../../resources/eigen
-#EIGEN_PATH  = ../../resources/eigen3
+#EIGEN_PATH  = ../../resources/eigen
+EIGEN_PATH  = ../../resources/eigen3
 SHADERLIB_PATH = ../../resources/shader-lib
-GLEW_PATH = ../../resources/glew
-#GLEW_PATH  = ../../../Documents/glew-1.10.0
+#GLEW_PATH = ../../resources/glew
+GLEW_PATH  = ../../../Documents/glew-1.10.0
 
 QT += core gui opengl
 
