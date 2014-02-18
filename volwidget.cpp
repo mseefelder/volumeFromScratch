@@ -34,6 +34,8 @@ void volWidget::initializeGL() {
 
 void volWidget::initialize() {
 
+    ins = 0;
+
     cameraTrackball = new Trackball;
     lightTrackball = new Trackball;
     mesh = new Mesh;
@@ -144,10 +146,12 @@ void volWidget::draw(void)
     //Enable the shader (pretty obvious)
     shader->enable();
 
+    //Prepare the uniforms
     GLint texIndex;
     texIndex = volume->bindTexture();
     TFid = transferFunction->bind();
 
+    //Set the uniforms
     shader->setUniform("volumeTexture", texIndex);
     shader->setUniform("transferFunction", TFid);
     shader->setUniform("textureDepth", volume->getTextureDepth());
@@ -159,4 +163,11 @@ void volWidget::draw(void)
     shader->disable();
 
     errorCheckFunc(__FILE__, __LINE__);
+}
+
+void volWidget::mouseMoveEvent(QMouseEvent *){
+
+        cout<<"inside"<< ins << endl;
+        ins += 1;
+
 }

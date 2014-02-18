@@ -38,6 +38,11 @@ public:
      */
     void volWidget::initializeTransferFunction();
 
+    /**
+     * @brief Is called when the mouse is pressed and moved over the Viewport
+     */
+    void volWidget::mouseMoveEvent(QMouseEvent *);
+
 signals:
 
 public slots:
@@ -78,6 +83,8 @@ private:
     int currentPosY;
 
     void draw(void);
+
+    int ins;
 
      //SNN *snn;
 };
