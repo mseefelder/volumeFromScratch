@@ -33,6 +33,8 @@ public:
      **/
     virtual void paintGL();
 
+    void setLayer(float layer);
+
     /**
      * @brief Initializes the transfer function
      */
@@ -50,6 +52,7 @@ public slots:
 private:
     //The volume we're working with
     Volume* volume;
+    GLint texIndex;
 
     //Transfer Function
     Texture* transferFunction;
@@ -99,6 +102,8 @@ private:
     void draw(void);
 
     int ins;
+
+    float curLayer;
 
      //SNN *snn;
 };

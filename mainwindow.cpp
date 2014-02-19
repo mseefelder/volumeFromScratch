@@ -12,3 +12,10 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::on_layer_valueChanged(const QString &arg1)
+{
+    cout << ui->layer->value() << endl;
+    ui->widget->setLayer(ui->layer->value());
+    ui->widget->update();
+}

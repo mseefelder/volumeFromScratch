@@ -52,7 +52,7 @@ public:
             cout << "3D texture file opened:"<<endl;
             int iterations = 0; //for debug purpose
             //while (!file.eof() && iterations<voxelArraySize)
-            while (iterations<16777216) //hardcoded number of bytes to read
+            while (!file.eof()) //hardcoded number of bytes to read
             {
                 file.read(buff, 1);
                 voxelArray[i] = (unsigned char)buff[0];

@@ -93,6 +93,10 @@ void volWidget::initialize() {
     //The initial rendPlaneCenter
     updateRendPlane();
 
+    //Texture stuff
+    texIndex = volume->bindTexture();
+    TFid = transferFunction->bind();
+
     errorCheckFunc(__FILE__, __LINE__);
 
 
@@ -144,7 +148,7 @@ void volWidget::paintGL(void) {
 
     glClearColor(0.0,0.0,0.0,1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    cout << this->width() << "w | " << this->height() << "h" << endl;
+    //cout << this->width() << "w | " << this->height() << "h" << endl;
     //cout << dims[0] << " " << dims[1] << endl;
     errorCheckFunc(__FILE__, __LINE__);
     draw();
@@ -161,18 +165,13 @@ void volWidget::draw(void)
 
     //Prepare the uniforms
 
-    //Texture stuff
-    GLint texIndex;
-    texIndex = volume->bindTexture();
-    TFid = transferFunction->bind();
-
     //stuff to calculate the positions
     uX << cameraTrackball->getViewMatrix().rotation() * Eigen::Vector3f(1.0,0.0,0.0) ,0.0;
     uY << cameraTrackball->getViewMatrix().rotation() * Eigen::Vector3f(0.0,1.0,0.0) ,0.0;
     uZ << cameraTrackball->getViewMatrix().rotation() * Eigen::Vector3f(0.0,0.0,1.0) ,0.0;
 
     //SUPER COUT
-    cout<<"rPC: "<<rendPlaneCenter<< endl << "diag: "<<volDiagonal<<endl<<uX<<endl << uY<<endl<<uZ<< endl<< volDimensions <<endl;
+    //cout<<"rPC: "<<rendPlaneCenter<< endl << "diag: "<<volDiagonal<<endl<<uX<<endl << uY<<endl<<uZ<< endl<< volDimensions <<endl;
 
     //Set the uniforms
     shader->setUniform("volumeTexture", texIndex);
@@ -185,6 +184,8 @@ void volWidget::draw(void)
     shader->setUniform("uZ", &uZ[0], 4, 1);
     shader->setUniform("rendPlaneCenter", &rendPlaneCenter[0], 4, 1);
     shader->setUniform("volDimensions", &volDimensions[0], 3, 1);
+
+    shader->setUniform("layer", curLayer);
 
     //Mesh Rendering:
     mesh->render();
@@ -211,4 +212,8 @@ void volWidget::updateRendPlane(){
     rendPlaneCenter.normalize();
     rendPlaneCenter = volDiagonal*rendPlaneCenter;
 
+}
+
+void volWidget::setLayer(float layer){
+    curLayer = layer;
 }

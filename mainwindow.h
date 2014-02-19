@@ -15,6 +15,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     
+private slots:
+    void on_layer_valueChanged(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
 };
