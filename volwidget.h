@@ -59,10 +59,13 @@ private:
     GLint TFid;
 
     //The unit vectors
-    Eigen::Vector3f uX, uY, uZ;
+    Eigen::Vector4f uX, uY, uZ;
 
     //The volume container diagonal size
     float volDiagonal;
+
+    //The volume container dimensions
+    Eigen::Vector3f volDimensions;
 
     ///Shader
     Shader* shader;
@@ -89,7 +92,7 @@ private:
     int currentPosY;
 
     ///Render plane center. Has to be updated everytime the camera moves
-    Eigen::Vector3f rendPlaneCenter;
+    Eigen::Vector4f rendPlaneCenter;
 
     void updateRendPlane();
 

@@ -81,13 +81,17 @@ void volWidget::initialize() {
     //Trackball Shader generation:
     cameraTrackball->loadShader();
 
-    //The maximum parallellepiped diagonal
+    //The maximum parallellepiped diagonal and volume container dimensions
     volDiagonal = volume->getDiagonal();
+    volDimensions = volume->getDimensions();
 
     //The unit vectors:
-    uX << 1.0, 0.0, 0.0;
-    uY << 0.0, 1.0, 0.0;
-    uZ << 0.0, 0.0, 1.0;
+    uX << 1.0, 0.0, 0.0, 0.0;
+    uY << 0.0, 1.0, 0.0, 0.0;
+    uZ << 0.0, 0.0, 1.0, 0.0;
+
+    //The initial rendPlaneCenter
+    updateRendPlane();
 
     errorCheckFunc(__FILE__, __LINE__);
 
@@ -163,18 +167,24 @@ void volWidget::draw(void)
     TFid = transferFunction->bind();
 
     //stuff to calculate the positions
+    uX << cameraTrackball->getViewMatrix().rotation() * Eigen::Vector3f(1.0,0.0,0.0) ,0.0;
+    uY << cameraTrackball->getViewMatrix().rotation() * Eigen::Vector3f(0.0,1.0,0.0) ,0.0;
+    uZ << cameraTrackball->getViewMatrix().rotation() * Eigen::Vector3f(0.0,0.0,1.0) ,0.0;
 
+    //SUPER COUT
+    cout<<"rPC: "<<rendPlaneCenter<< endl << "diag: "<<volDiagonal<<endl<<uX<<endl << uY<<endl<<uZ<< endl<< volDimensions <<endl;
 
     //Set the uniforms
     shader->setUniform("volumeTexture", texIndex);
     shader->setUniform("transferFunction", TFid);
     shader->setUniform("textureDepth", volume->getTextureDepth());
 
-    //shader->setUniform("diagonal", volDiagonal);
-    //shader->setUniform("uX", uX);
-    //shader->setUniform("uY", uY);
-    //shader->setUniform("uZ", uZ);
-    ///shader->
+    shader->setUniform("diagonal", volDiagonal);
+    shader->setUniform("uX", &uX[0], 4, 1);
+    shader->setUniform("uY", &uY[0], 4, 1);
+    shader->setUniform("uZ", &uZ[0], 4, 1);
+    shader->setUniform("rendPlaneCenter", &rendPlaneCenter[0], 4, 1);
+    shader->setUniform("volDimensions", &volDimensions[0], 3, 1);
 
     //Mesh Rendering:
     mesh->render();
@@ -190,11 +200,15 @@ void volWidget::mouseMoveEvent(QMouseEvent *){
         cout<<"inside"<< ins << endl;
         ins += 1;
 
+
 }
 
 void volWidget::updateRendPlane(){
-    //Eigen::Vector3f cameraPos;
-    //cameraPos = cameraTrackball->getCenter();
-    //rendPlaneCenter = volDiagonal*(cameraPos/Eigen::VectorwiseOp::norm(cameraPos));
+    Eigen::Vector3f cameraPos;
+    cameraPos = cameraTrackball->getCenter();
+    //rendPlaneCenter = volDiagonal*(cameraPos/Eigen::VectorwiseOp::norm(&cameraPos));
+    rendPlaneCenter << cameraPos, 0.0;
+    rendPlaneCenter.normalize();
+    rendPlaneCenter = volDiagonal*rendPlaneCenter;
 
 }

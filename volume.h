@@ -109,6 +109,11 @@ public:
     float getDiagonal();
 
     /**
+      @brief Returns the maximum daigonal of the parallellepiped containing the volume
+    **/
+    Eigen::Vector3f getDimensions();
+
+    /**
       @brief Returns number of layers of the 3D texture
     **/
     int getTextureDepth() {
