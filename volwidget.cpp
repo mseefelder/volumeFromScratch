@@ -99,6 +99,8 @@ void volWidget::initialize() {
 
     errorCheckFunc(__FILE__, __LINE__);
 
+    this->setMouseTracking(true);
+
 
 }
 
@@ -166,9 +168,7 @@ void volWidget::draw(void)
     //Prepare the uniforms
 
     //stuff to calculate the positions
-    uX << cameraTrackball->getViewMatrix().rotation() * Eigen::Vector3f(1.0,0.0,0.0) ,0.0;
-    uY << cameraTrackball->getViewMatrix().rotation() * Eigen::Vector3f(0.0,1.0,0.0) ,0.0;
-    uZ << cameraTrackball->getViewMatrix().rotation() * Eigen::Vector3f(0.0,0.0,1.0) ,0.0;
+
 
     //SUPER COUT
     //cout<<"rPC: "<<rendPlaneCenter<< endl << "diag: "<<volDiagonal<<endl<<uX<<endl << uY<<endl<<uZ<< endl<< volDimensions <<endl;
@@ -196,10 +196,43 @@ void volWidget::draw(void)
     errorCheckFunc(__FILE__, __LINE__);
 }
 
-void volWidget::mouseMoveEvent(QMouseEvent *){
+void volWidget::mousePressEvent(QMouseEvent *event){
+    Eigen::Vector2f screenPos;
+    screenPos << event->pos().x()/256.0, (256-(event->pos().y())/256.0);
+    cameraTrackball->setInitialRotationPosition(screenPos);
+    cameraTrackball->beginRotation();
+    cout<<"rotation began"<<endl;
+}
 
-        cout<<"inside"<< ins << endl;
-        ins += 1;
+void volWidget::mouseReleaseEvent(QMouseEvent *event){
+    if(cameraTrackball->isRotating()) {
+        cameraTrackball->endRotation();
+        cout<<"rotation ended"<<endl;
+    }
+}
+
+void volWidget::mouseMoveEvent(QMouseEvent *event){
+
+    //cout<<"inside"<< ins << endl;
+    //qDebug() << event->pos();
+    //ins += 1;
+
+    Eigen::Vector2f screenPos;
+    screenPos << event->pos().x()/256.0, ((256-(event->pos().y()))/256.0);
+    if (cameraTrackball->isRotating()){
+        cameraTrackball->setFinalRotationPosition(screenPos);
+        cameraTrackball->rotateCamera();
+        cameraTrackball->setInitialRotationPosition(screenPos);
+
+        updateUnitVectors();
+        updateRendPlane();
+        this->update();
+
+        cout<<"Rotated"<<endl<<rendPlaneCenter<<endl;
+    }
+
+        //cameraTrackball->setFinalRotationPosition(this->mouseReleaseEvent());
+        //cameraTrackball->calculateRotation();
 
 
 }
@@ -210,10 +243,16 @@ void volWidget::updateRendPlane(){
     //rendPlaneCenter = volDiagonal*(cameraPos/Eigen::VectorwiseOp::norm(&cameraPos));
     rendPlaneCenter << cameraPos, 0.0;
     rendPlaneCenter.normalize();
-    rendPlaneCenter = volDiagonal*rendPlaneCenter;
+    rendPlaneCenter = (volDiagonal/2.0)*rendPlaneCenter;
 
 }
 
 void volWidget::setLayer(float layer){
     curLayer = layer;
+}
+
+void volWidget::updateUnitVectors(){
+    uX << cameraTrackball->getViewMatrix().rotation() * Eigen::Vector3f(1.0,0.0,0.0) ,0.0;
+    uY << cameraTrackball->getViewMatrix().rotation() * Eigen::Vector3f(0.0,1.0,0.0) ,0.0;
+    uZ << cameraTrackball->getViewMatrix().rotation() * Eigen::Vector3f(0.0,0.0,1.0) ,0.0;
 }

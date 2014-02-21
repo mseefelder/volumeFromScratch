@@ -11,6 +11,8 @@
 
 
 #include <QGLWidget>
+#include <QMouseEvent>
+#include <QDebug>
 
 
 class volWidget : public QGLWidget
@@ -43,7 +45,17 @@ public:
     /**
      * @brief Is called when the mouse is pressed and moved over the Viewport
      */
-    void volWidget::mouseMoveEvent(QMouseEvent *);
+    void volWidget::mouseMoveEvent(QMouseEvent *event);
+    /**
+     * @brief Is called when the mouse is pressed
+     */
+    void volWidget::mousePressEvent(QMouseEvent *event);
+    /**
+     * @brief Is called when the mouse is released
+     */
+    void volWidget::mouseReleaseEvent(QMouseEvent *event);
+
+    void volWidget::updateUnitVectors();
 
 signals:
 

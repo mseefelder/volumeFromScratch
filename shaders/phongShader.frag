@@ -33,19 +33,19 @@ void main(void)
     vec4 acColor = vec4(0.0, 0.0, 0.0, 1.0);
 
     vec2 coord = gl_FragCoord.xy/256.0;
-
+/*
     for (int i; i<(numberOfSteps-1); i++){
         float voxelValue;
         float where= i * 0.00390625;
-        voxelValue = texture(volumeTexture, vec3(coord, layer)).r;
+        voxelValue = texture(volumeTexture, vec3(coord, i/256.0)).r;
         acColor.x = acColor.x + voxelValue/numberOfSteps;
     }
 
 
     out_Color = acColor;
-
+*/
 ///----------------------------------------------------------------------------------
-/*
+
     acColor = vec4(0.0, 0.0, 0.0, 1.0);
 
     vec3 fPos = gl_FragCoord.xyz/256.0;
@@ -54,8 +54,8 @@ void main(void)
 
     float eX, eY;
 
-    eX = (fPos.x-0.5)*2.0*diagonal;
-    eY = (fPos.y-0.5)*2.0*diagonal;
+    eX = (fPos.x-0.5)*diagonal;
+    eY = (fPos.y-0.5)*diagonal;
     wFPos = (rendPlaneCenter+eX*uX+eY*uY).xyz;
     currentPos = wFPos;
 
@@ -63,20 +63,20 @@ void main(void)
         bvec3 isInsideTheVolume = lessThan(abs(currentPos), volDimensions);
         //bvec3 isInsideTheVolume = bvec3();
         vec3 coord = ((currentPos.xyz+volDimensions)*0.5/(volDimensions)).xyz;
-        //if(all(isInsideTheVolume)){// && all(lessThan(coord, vec3(1.0))) && all(greaterThan(coord, vec3(0.0)))){
-        if(abs(currentPos.y)<volDimensions.y){
+        if(all(isInsideTheVolume)){// && all(lessThan(coord, vec3(1.0))) && all(greaterThan(coord, vec3(0.0)))){
+        //if(abs(currentPos.y)<volDimensions.y){
             float voxelValue;
             voxelValue = texture(volumeTexture, vec3(currentPos)/10).r;
-            acColor.x = acColor.x + voxelValue;
+            acColor.x = acColor.x + voxelValue/(numberOfSteps/2.0);
         }
         else{
-            acColor.y = acColor.y + 0.001;
+            //acColor.y = acColor.y + 0.001;
        }
         currentPos = currentPos + stepSize*uZ.xyz;
     }
 
     out_Color = acColor;
-*/
+
 //-------------------------------------------------------------------------------------
 
     //out_Color = vec4(uX.xyz,1.0);

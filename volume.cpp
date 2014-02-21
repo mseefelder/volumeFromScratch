@@ -53,7 +53,7 @@ void Volume::loadVolume(){
     texture = new Texture();
     cout << "Texture instantiated." << endl;
     errorCheckFunc(__FILE__, __LINE__);
-    Id = texture->create(GL_TEXTURE_3D, GL_R8, volSize[0], volSize[1], GL_RED, GL_UNSIGNED_BYTE, voxelArray, volSize[2]); // "Id =" because...
+    Id = texture->create(GL_TEXTURE_3D, GL_RG8, volSize[0], volSize[1], GL_RG, GL_UNSIGNED_BYTE, voxelArray, volSize[2]); // "Id =" because...
                                                         //...this funcion returns a GLuint value that represents the texture ID.
     errorCheckFunc(__FILE__, __LINE__);
     cout << "Texture created." << endl;
