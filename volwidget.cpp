@@ -177,6 +177,8 @@ void volWidget::draw(void)
     shader->setUniform("volumeTexture", texIndex);
     shader->setUniform("transferFunction", TFid);
     shader->setUniform("textureDepth", volume->getTextureDepth());
+    shader->setUniform("screenWidth", this->width());
+    shader->setUniform("screenHeight",this->height());
 
     shader->setUniform("diagonal", volDiagonal);
     shader->setUniform("uX", &uX[0], 4, 1);
@@ -205,9 +207,12 @@ void volWidget::mousePressEvent(QMouseEvent *event){
 }
 
 void volWidget::mouseReleaseEvent(QMouseEvent *event){
+    Eigen::Vector2f screenPos;
+    screenPos << event->pos().x()/256.0, ((256-(event->pos().y()))/256.0);
     if(cameraTrackball->isRotating()) {
         cameraTrackball->endRotation();
         cout<<"rotation ended"<<endl;
+        cameraTrackball->setInitialRotationPosition(screenPos);
     }
 }
 
@@ -252,7 +257,12 @@ void volWidget::setLayer(float layer){
 }
 
 void volWidget::updateUnitVectors(){
-    uX << cameraTrackball->getViewMatrix().rotation() * Eigen::Vector3f(1.0,0.0,0.0) ,0.0;
-    uY << cameraTrackball->getViewMatrix().rotation() * Eigen::Vector3f(0.0,1.0,0.0) ,0.0;
-    uZ << cameraTrackball->getViewMatrix().rotation() * Eigen::Vector3f(0.0,0.0,1.0) ,0.0;
+    Eigen::Affine3f projection, model, view, final;
+    projection = cameraTrackball->getProjectionMatrix();
+    model = cameraTrackball->getModelMatrix();
+    view = cameraTrackball->getViewMatrix();
+    final = view;
+    uX << final.rotation() * Eigen::Vector3f(1.0,0.0,0.0) ,0.0;
+    uY << final.rotation() * Eigen::Vector3f(0.0,1.0,0.0) ,0.0;
+    uZ << final.rotation() * Eigen::Vector3f(0.0,0.0,1.0) ,0.0;
 }
