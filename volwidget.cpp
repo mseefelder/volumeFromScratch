@@ -34,13 +34,14 @@ void volWidget::initializeGL() {
 
 void volWidget::initialize() {
 
-    ins = 0;
+    //ins = 0;
 
     cameraTrackball = new Trackball;
     lightTrackball = new Trackball;
     mesh = new Mesh;
     shader = new Shader("shaders/","phongShader",0);
 
+///Other datasets:
 //    int* size = new int[3];
 //    size[0] = 64; size[1] = 64; size[2] = 64;
 //    Eigen::Vector3f  dimension;
@@ -52,14 +53,10 @@ void volWidget::initialize() {
 //    Eigen::Vector3f  dimension;
 //    dimension << 1.0, 1.0, 1.0;
 //    volume = new Volume("datasets/bonsai256x1.raw",size, dimension);
-
+///
 
     volume = new Volume;
     cout << "Volume created" << endl;
-
-    //Initialize Textures:
-    //transferFunction = new Texture;
-    //createTexture1D(transferFunction);
 
     //Initialize transfer function:
     initializeTransferFunction();
@@ -67,33 +64,35 @@ void volWidget::initialize() {
     //Initializing Matrices
     cameraTrackball->initOpenGLMatrices();
     lightTrackball->initOpenGLMatrices();
-    Eigen::Matrix4f projectionMatrix = cameraTrackball->createPerspectiveMatrix(60.0 , (float)currentWidth/(float)currentHeight, 1.0f , 100.0f );
-    cameraTrackball->setProjectionMatrix(projectionMatrix);
-
-    mesh->createQuad();
+    ///Not using this part because I'm doing it Ortographic style:
+    //cameraTrackball->setProjectionMatrix(projectionMatrix);
+    //Eigen::Matrix4f projectionMatrix = cameraTrackball->createPerspectiveMatrix(60.0 , (float)currentWidth/(float)currentHeight, 1.0f , 100.0f );
 
     cameraTrackball->initializeBuffers();
 
+    mesh->createQuad();
+
     shader->initialize();
 
+    ///Adjust the viewport size
     glViewport(0, 0, this->width(), this->height());
 
-    //Trackball Shader generation:
-    cameraTrackball->loadShader();
+    ///Trackball Shader generation, not used yet:
+    //cameraTrackball->loadShader();
 
-    //The maximum parallellepiped diagonal and volume container dimensions
+    ///The maximum parallellepiped diagonal and volume container dimensions
     volDiagonal = volume->getDiagonal();
     volDimensions = volume->getDimensions();
 
-    //The unit vectors:
+    ///The unit vectors:
     uX << 1.0, 0.0, 0.0, 0.0;
     uY << 0.0, 1.0, 0.0, 0.0;
     uZ << 0.0, 0.0, 1.0, 0.0;
 
-    //The initial rendPlaneCenter
+    ///The initial rendPlaneCenter
     updateRendPlane();
 
-    //Texture stuff
+    ///Texture stuff
     texIndex = volume->bindTexture();
     TFid = transferFunction->bind();
 
@@ -164,11 +163,8 @@ void volWidget::draw(void)
 
     //Enable the shader (pretty obvious)
     shader->enable();
-
-    //Prepare the uniforms
-
-    //stuff to calculate the positions
-
+    updateRendPlane();
+    updateUnitVectors();
 
     //SUPER COUT
     //cout<<"rPC: "<<rendPlaneCenter<< endl << "diag: "<<volDiagonal<<endl<<uX<<endl << uY<<endl<<uZ<< endl<< volDimensions <<endl;
@@ -200,7 +196,8 @@ void volWidget::draw(void)
 
 void volWidget::mousePressEvent(QMouseEvent *event){
     Eigen::Vector2f screenPos;
-    screenPos << event->pos().x()/256.0, (256-(event->pos().y())/256.0);
+    ///screenPos << event->pos().x()/256.0, (256-(event->pos().y())/256.0);
+    screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0, (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
     cameraTrackball->setInitialRotationPosition(screenPos);
     cameraTrackball->beginRotation();
     cout<<"rotation began"<<endl;
@@ -208,7 +205,7 @@ void volWidget::mousePressEvent(QMouseEvent *event){
 
 void volWidget::mouseReleaseEvent(QMouseEvent *event){
     Eigen::Vector2f screenPos;
-    screenPos << event->pos().x()/256.0, ((256-(event->pos().y()))/256.0);
+    screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0, (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
     if(cameraTrackball->isRotating()) {
         cameraTrackball->endRotation();
         cout<<"rotation ended"<<endl;
@@ -223,17 +220,18 @@ void volWidget::mouseMoveEvent(QMouseEvent *event){
     //ins += 1;
 
     Eigen::Vector2f screenPos;
-    screenPos << event->pos().x()/256.0, ((256-(event->pos().y()))/256.0);
+    screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0, (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
+    cout<<screenPos<<endl;
     if (cameraTrackball->isRotating()){
         cameraTrackball->setFinalRotationPosition(screenPos);
         cameraTrackball->rotateCamera();
         cameraTrackball->setInitialRotationPosition(screenPos);
 
-        updateUnitVectors();
-        updateRendPlane();
+        //updateUnitVectors();
+        //updateRendPlane();
         this->update();
 
-        cout<<"Rotated"<<endl<<rendPlaneCenter<<endl;
+        //cout<<"Rotated"<<endl<<rendPlaneCenter<<endl;
     }
 
         //cameraTrackball->setFinalRotationPosition(this->mouseReleaseEvent());
@@ -243,10 +241,9 @@ void volWidget::mouseMoveEvent(QMouseEvent *event){
 }
 
 void volWidget::updateRendPlane(){
-    Eigen::Vector3f cameraPos;
-    cameraPos = cameraTrackball->getCenter();
-    //rendPlaneCenter = volDiagonal*(cameraPos/Eigen::VectorwiseOp::norm(&cameraPos));
-    rendPlaneCenter << cameraPos, 0.0;
+    //Eigen::Vector3f cameraPos;
+    //cameraPos = cameraTrackball->getCenter();
+    rendPlaneCenter << cameraTrackball->getCenter(), 0.0;
     rendPlaneCenter.normalize();
     rendPlaneCenter = (volDiagonal/2.0)*rendPlaneCenter;
 
@@ -261,7 +258,7 @@ void volWidget::updateUnitVectors(){
     projection = cameraTrackball->getProjectionMatrix();
     model = cameraTrackball->getModelMatrix();
     view = cameraTrackball->getViewMatrix();
-    final = view;
+    final = view.inverse();
     uX << final.rotation() * Eigen::Vector3f(1.0,0.0,0.0) ,0.0;
     uY << final.rotation() * Eigen::Vector3f(0.0,1.0,0.0) ,0.0;
     uZ << final.rotation() * Eigen::Vector3f(0.0,0.0,1.0) ,0.0;
