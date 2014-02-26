@@ -28,18 +28,17 @@ void main(void)
 
     int numberOfSteps;
     float stepSize;
-    numberOfSteps = max(screenHeight, screenWidth);
+    numberOfSteps = 256; //(max(screenHeight, screenWidth));
     stepSize = diagonal/numberOfSteps;
 
     //out_Color = vec4(1.0, 1.0, 1.0 ,1.0);
     vec4 acColor = vec4(0.0, 0.0, 0.0, 1.0);
-
-    //vec2 coord = gl_FragCoord.xy/256.0;
 /*
+    vec2 coord = vec2(gl_FragCoord.x/screenWidth, gl_FragCoord.y/screenHeight);
     for (int i; i<(numberOfSteps-1); i++){
         float voxelValue;
         float where= i * 0.00390625;
-        voxelValue = texture(volumeTexture, vec3(coord, i/256.0)).r;
+        voxelValue = texture(volumeTexture, vec3(coord, layer)).r;
         acColor.x = acColor.x + voxelValue/numberOfSteps;
     }
 
@@ -50,9 +49,11 @@ void main(void)
 
     acColor = vec4(0.0, 0.0, 0.0, 1.0);
 
+
     vec3 fPos = vec3(gl_FragCoord.x/screenWidth, gl_FragCoord.y/screenHeight, 0.0);
     vec3 wFPos;
     vec3 currentPos;
+    vec3 volDimHalf = volDimensions/2.0;
 
     float eX, eY;
 
@@ -62,19 +63,21 @@ void main(void)
     currentPos = wFPos;
 
     for(int j; j<(numberOfSteps+1); j++){
-        bvec3 isInsideTheVolume = lessThan(abs(currentPos), volDimensions);
-        //bvec3 isInsideTheVolume = bvec3();
-        vec3 coord = ((currentPos.xyz+volDimensions)*0.5/(volDimensions)).xyz;
-        if(all(isInsideTheVolume) && all(lessThan(coord, vec3(1.0))) && all(greaterThan(coord, vec3(0.0)))){
-        //if(abs(currentPos.y)<volDimensions.y){
+        //bvec3 isInsideTheVolume = lessThan(abs(currentPos), volDimensions);
+        //vec3 coord = ((currentPos.xyz+volDimensions)*0.5/(volDimensions)).xyz;
+        vec3 coord = (currentPos.xyz+volDimensions)*0.5/(volDimensions).xyz;
+        //if(all(isInsideTheVolume) && all(lessThan(coord, vec3(1.0))) && all(greaterThan(coord, vec3(0.0)))){
+        if(coord.x<1.0 && coord.x>0.0 && coord.y<1.0 && coord.y>0.0 && coord.z<1.0 && coord.z>0.0){
             float voxelValue;
-            voxelValue = texture(volumeTexture, vec3(currentPos)/10).r;
-            acColor.x = acColor.x + 10*(voxelValue/(numberOfSteps/2.0));
+            voxelValue = texture(volumeTexture, coord).r;
+            acColor.x = acColor.x + 10*(voxelValue/numberOfSteps);
+            acColor.xyz = acColor.xyz + coord/numberOfSteps;
         }
         else{
             acColor.xyz = acColor.xyz + vec3(0.0001);
        }
         currentPos = currentPos + stepSize*uZ.xyz;
+        //currentPos = currentPos + 5*uZ.xyz;
     }
     //acColor = 1.25*vec4(acColor.x, acColor.x, acColor.x, 1.0);
     out_Color = acColor;

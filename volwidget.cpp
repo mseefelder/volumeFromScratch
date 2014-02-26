@@ -34,8 +34,6 @@ void volWidget::initializeGL() {
 
 void volWidget::initialize() {
 
-    //ins = 0;
-
     cameraTrackball = new Trackball;
     lightTrackball = new Trackball;
     mesh = new Mesh;
@@ -64,9 +62,6 @@ void volWidget::initialize() {
     //Initializing Matrices
     cameraTrackball->initOpenGLMatrices();
     lightTrackball->initOpenGLMatrices();
-    ///Not using this part because I'm doing it Ortographic style:
-    //cameraTrackball->setProjectionMatrix(projectionMatrix);
-    //Eigen::Matrix4f projectionMatrix = cameraTrackball->createPerspectiveMatrix(60.0 , (float)currentWidth/(float)currentHeight, 1.0f , 100.0f );
 
     cameraTrackball->initializeBuffers();
 
@@ -75,7 +70,11 @@ void volWidget::initialize() {
     shader->initialize();
 
     ///Adjust the viewport size
-    glViewport(0, 0, this->width(), this->height());
+    currentWidth = this->width();
+    currentHeight = this->height();
+    glViewport(0, 0, currentWidth, currentHeight);
+    Eigen::Matrix4f projectionMatrix = cameraTrackball->createPerspectiveMatrix(60.0 , (float)currentWidth/(float)currentHeight, 1.0f , 100.0f );
+    cameraTrackball->setProjectionMatrix(projectionMatrix);
 
     ///Trackball Shader generation, not used yet:
     //cameraTrackball->loadShader();
@@ -158,9 +157,6 @@ void volWidget::paintGL(void) {
 
 void volWidget::draw(void)
 {
-
-    //The matrices multiplication order is: Projection * View * Model * Vertex.
-
     //Enable the shader (pretty obvious)
     shader->enable();
     updateRendPlane();
@@ -190,6 +186,8 @@ void volWidget::draw(void)
     cout << "Mesh rendered" << endl;
 
     shader->disable();
+
+    cout << rendPlaneCenter << endl;
 
     errorCheckFunc(__FILE__, __LINE__);
 }
@@ -221,7 +219,9 @@ void volWidget::mouseMoveEvent(QMouseEvent *event){
 
     Eigen::Vector2f screenPos;
     screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0, (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
-    cout<<screenPos<<endl;
+    //cout<<screenPos<<endl;
+    setLayer(screenPos[0]);
+
     if (cameraTrackball->isRotating()){
         cameraTrackball->setFinalRotationPosition(screenPos);
         cameraTrackball->rotateCamera();

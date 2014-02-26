@@ -70,7 +70,7 @@ public:
         mesh = new Mesh();
         cout << "Mesh created." << endl;
 
-        realDimension << 10.0, 10.0, 10.0;
+        realDimension << 1.0, 1.0, 1.0;
 
         ///Loading the Volume
         cout << "Entering loadVolume()" << endl;
