@@ -245,7 +245,7 @@ void volWidget::updateRendPlane(){
     //cameraPos = cameraTrackball->getCenter();
     rendPlaneCenter << cameraTrackball->getCenter(), 0.0;
     rendPlaneCenter.normalize();
-    rendPlaneCenter = (volDiagonal/2.0)*rendPlaneCenter;
+    rendPlaneCenter << (volDiagonal/2.0)*rendPlaneCenter;
 
 }
 
@@ -255,8 +255,8 @@ void volWidget::setLayer(float layer){
 
 void volWidget::updateUnitVectors(){
     Eigen::Affine3f projection, model, view, final;
-    projection = cameraTrackball->getProjectionMatrix();
-    model = cameraTrackball->getModelMatrix();
+    //projection = cameraTrackball->getProjectionMatrix();
+    //model = cameraTrackball->getModelMatrix();
     view = cameraTrackball->getViewMatrix();
     final = view.inverse();
     uX << final.rotation() * Eigen::Vector3f(1.0,0.0,0.0) ,0.0;
