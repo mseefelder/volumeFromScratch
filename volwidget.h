@@ -57,6 +57,8 @@ public:
 
     void volWidget::updateUnitVectors();
 
+    void volWidget::resetTransferFunction(int a, int b, int c, int d);
+
 signals:
 
 public slots:
@@ -117,7 +119,8 @@ private:
 
     float curLayer;
 
-     //SNN *snn;
+protected:
+    virtual void keyPressEvent(QKeyEvent *keyevent);
 };
 
 #endif // VOLWIDGET_H

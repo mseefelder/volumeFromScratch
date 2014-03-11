@@ -50,7 +50,7 @@ void volWidget::initialize() {
 //    size[0] = 256; size[1] = 256; size[2] = 256;
 //    Eigen::Vector3f  dimension;
 //    dimension << 1.0, 1.0, 1.0;
-//    volume = new Volume("datasets/bonsai256x1.raw",size, dimension);
+//    volume = new Volume("datasets/skull256x1.raw",size, dimension);
 ///
 
     volume = new Volume;
@@ -130,11 +130,91 @@ void volWidget::initializeTransferFunction(){
 
     cout<<"TF successfully created!"<<endl;
 
-//    glEnable(GL_TEXTURE_1D);
-//    glBindTexture(GL_TEXTURE_1D,transferFunction);//Do I need to enable GL_TEXTURE_1D?
-//    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, 256, 0, GL_RGBA, GL_FLOAT, &values[0]);
-//    glBindTexture(GL_TEXTURE_1D,0);
-//    glDisable(GL_TEXTURE_1D);
+    errorCheckFunc(__FILE__, __LINE__);
+
+}
+
+void volWidget::resetTransferFunction(int a, int b, int c, int d){
+
+    float values[256*4];
+
+    values[0] = 0.0;
+    values[1] = 0.0;
+    values[2] = 0.0;
+    values[3] = 0.0;
+
+    if (a > 0){
+        for(int i = 0; i < a; i++){
+            values[i*4] = 0.0;
+            values[i*4+1] = 0.0;
+            values[i*4+2] = 0.0;
+            values[i*4+3] = 0.0;
+        }
+    }
+
+    float dividerAB = 1.0*(b-a);
+    for(int i = a; i<b; i++) {
+            values[i*4] = 1.0;
+            values[i*4+1] = 1.0*((i-a)/dividerAB);
+            values[i*4+2] = 1.0*((i-a)/dividerAB);
+            values[i*4+3] = 0.01*((i-a)/dividerAB);
+    }
+
+    for(int i = b; i < c; i++){
+        values[i*4] = 1.0;
+        values[i*4+1] = 1.0;
+        values[i*4+2] = 1.0;
+        values[i*4+3] = 0.05;
+    }
+
+    float dividerCD = 1.0*(d-c);
+    for(int i = c; i < d; i++){
+        values[i*4] = 1.0*((i-c)/dividerCD);
+        values[i*4+1] = 1.0;
+        values[i*4+2] = 1.0;
+        values[i*4+3] = 0.01*((i-c)/dividerCD);
+    }
+
+    if (d < 256) {
+        for(int i = d; i < 256; i++){
+            values[i*4] = 0.0;
+            values[i*4+1] = 0.0;
+            values[i*4+2] = 0.0;
+            values[i*4+3] = 0.0;
+        }
+    }
+
+//    float values[256*4];
+
+//    values[0] = 0.0;
+//    values[1] = 0.0;
+//    values[2] = 0.0;
+//    values[3] = 0.0;
+
+//    for(int i = 1; i<256; i++) {//*4 because of 256 RGBA values
+//            values[i*4] = 1.0;
+//            values[i*4+1] = 1.0;
+//            values[i*4+2] = 0.0;
+//            values[i*4+3] = 0.01;
+//    }
+
+    transferFunction->unbind();
+    delete transferFunction;
+
+
+    transferFunction = new Texture();
+    cout << "TF initializing" << endl;
+    errorCheckFunc(__FILE__, __LINE__);
+    TFuid = transferFunction->create(GL_TEXTURE_1D, GL_RGBA32F, 256, 256, GL_RGBA, GL_FLOAT, values, 256); // "Id =" because...
+                                                        //...this funcion returns a GLuint value that represents the texture ID.
+    errorCheckFunc(__FILE__, __LINE__);
+    cout << "TF created." << endl;
+    transferFunction->setTexParameters(GL_CLAMP, GL_CLAMP, GL_CLAMP, GL_LINEAR, GL_LINEAR);
+    cout << "TF parameters set." << endl;
+
+    cout<<"TF successfully created!"<<endl;
+    TFid = transferFunction->bind();
+
     errorCheckFunc(__FILE__, __LINE__);
 
 }
@@ -217,6 +297,8 @@ void volWidget::mouseMoveEvent(QMouseEvent *event){
     //qDebug() << event->pos();
     //ins += 1;
 
+    setFocus();
+
     Eigen::Vector2f screenPos;
     screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0, (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
     //cout<<screenPos<<endl;
@@ -262,4 +344,16 @@ void volWidget::updateUnitVectors(){
     uX << final.rotation() * Eigen::Vector3f(1.0,0.0,0.0) ,0.0;
     uY << final.rotation() * Eigen::Vector3f(0.0,1.0,0.0) ,0.0;
     uZ << final.rotation() * Eigen::Vector3f(0.0,0.0,1.0) ,0.0;
+}
+
+void volWidget::keyPressEvent(QKeyEvent *keyevent){
+    if (keyevent->key() == Qt::Key_F5){
+        shader->reloadShaders();
+        cout << "F5 pressed, reloading shader...";
+    }
+
+    if (keyevent->key() == Qt::Key_F6){
+        resetTransferFunction(8, 64, 240, 256);
+        cout << "F6 pressed, reseting transfer function...";
+    }
 }

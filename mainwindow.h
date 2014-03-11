@@ -17,6 +17,14 @@ public:
     
 private slots:
 
+    void on_tf_A_valueChanged(int value);
+
+    void on_tf_B_valueChanged(int value);
+
+    void on_tf_C_valueChanged(int value);
+
+    void on_resetTF_clicked();
+
 private:
     Ui::MainWindow *ui;
 };
