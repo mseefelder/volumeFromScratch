@@ -120,6 +120,10 @@ public:
         return volSize[2];
     }
 
+    int * getTextureResolution() {
+        return volSize;
+    }
+
     //Volume(string fileName){}
 
     virtual ~Volume() {}

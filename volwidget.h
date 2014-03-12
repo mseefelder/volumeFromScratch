@@ -13,6 +13,7 @@
 #include <QGLWidget>
 #include <QMouseEvent>
 #include <QDebug>
+#include <QTime>
 
 
 class volWidget : public QGLWidget
@@ -46,17 +47,25 @@ public:
      * @brief Is called when the mouse is pressed and moved over the Viewport
      */
     void volWidget::mouseMoveEvent(QMouseEvent *event);
+
     /**
      * @brief Is called when the mouse is pressed
      */
     void volWidget::mousePressEvent(QMouseEvent *event);
+
     /**
      * @brief Is called when the mouse is released
      */
     void volWidget::mouseReleaseEvent(QMouseEvent *event);
 
+    /**
+     * @brief Recalculate the unit vectors
+     */
     void volWidget::updateUnitVectors();
 
+    /**
+     * @brief Resets the transfer function
+     */
     void volWidget::resetTransferFunction(int a, int b, int c, int d);
 
 signals:
@@ -78,11 +87,13 @@ private:
     //The unit vectors
     Eigen::Vector4f uX, uY, uZ;
 
-    //The volume container diagonal size
+    //The volume container diagonal size and dimensions
     float volDiagonal;
-
-    //The volume container dimensions
     Eigen::Vector3f volDimensions;
+
+    //Number of steps and step size for rendering
+    int numberOfSteps;
+    float stepSize;
 
     ///Shader
     Shader* shader;
@@ -110,6 +121,10 @@ private:
 
     ///Render plane center. Has to be updated everytime the camera moves
     Eigen::Vector4f rendPlaneCenter;
+
+    //FPS counting:
+    QTime *time;
+    int fps;
 
     void updateRendPlane();
 

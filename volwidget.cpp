@@ -39,6 +39,7 @@ void volWidget::initialize() {
     mesh = new Mesh;
     shader = new Shader("shaders/","phongShader",0);
 
+/// VOLUME CONFIGURATION---------
 ///Other datasets:
 //    int* size = new int[3];
 //    size[0] = 64; size[1] = 64; size[2] = 64;
@@ -51,10 +52,27 @@ void volWidget::initialize() {
 //    Eigen::Vector3f  dimension;
 //    dimension << 1.0, 1.0, 1.0;
 //    volume = new Volume("datasets/skull256x1.raw",size, dimension);
+
+
+//    int* size = new int[3];
+//    size[0] = 301; size[1] = 324; size[2] = 56;
+//    Eigen::Vector3f  dimension;
+//    dimension << 1.0, 1.0, 1.4;
+//    volume = new Volume("datasets/lobster301x324x56x1x1x1_4.raw",size, dimension);
 ///
 
     volume = new Volume;
     cout << "Volume created" << endl;
+
+    ///The maximum parallellepiped diagonal and volume container dimensions
+    volDiagonal = volume->getDiagonal();
+    volDimensions = volume->getDimensions();
+
+    //Set number of steps and calculate step size:
+    int * vRes = volume->getTextureResolution();
+    numberOfSteps = max(max(vRes[0], vRes[1]), vRes[2]);
+    stepSize = volDiagonal/numberOfSteps;
+/// -----------------------------
 
     //Initialize transfer function:
     initializeTransferFunction();
@@ -73,15 +91,13 @@ void volWidget::initialize() {
     currentWidth = this->width();
     currentHeight = this->height();
     glViewport(0, 0, currentWidth, currentHeight);
+
+    //Perspective configuration. Not used yet, because I'm doing it ortogrphically.
     Eigen::Matrix4f projectionMatrix = cameraTrackball->createPerspectiveMatrix(60.0 , (float)currentWidth/(float)currentHeight, 1.0f , 100.0f );
     cameraTrackball->setProjectionMatrix(projectionMatrix);
 
     ///Trackball Shader generation, not used yet:
     //cameraTrackball->loadShader();
-
-    ///The maximum parallellepiped diagonal and volume container dimensions
-    volDiagonal = volume->getDiagonal();
-    volDimensions = volume->getDimensions();
 
     ///The unit vectors:
     uX << 1.0, 0.0, 0.0, 0.0;
@@ -91,13 +107,17 @@ void volWidget::initialize() {
     ///The initial rendPlaneCenter
     updateRendPlane();
 
-    ///Texture stuff
+    ///Texture binding
     texIndex = volume->bindTexture();
     TFid = transferFunction->bind();
 
+    //For fps counting
+    time = new QTime();
+    time->start();
+
     errorCheckFunc(__FILE__, __LINE__);
 
-    this->setMouseTracking(true);
+    //this->setMouseTracking(true);
 
 
 }
@@ -184,20 +204,6 @@ void volWidget::resetTransferFunction(int a, int b, int c, int d){
         }
     }
 
-//    float values[256*4];
-
-//    values[0] = 0.0;
-//    values[1] = 0.0;
-//    values[2] = 0.0;
-//    values[3] = 0.0;
-
-//    for(int i = 1; i<256; i++) {//*4 because of 256 RGBA values
-//            values[i*4] = 1.0;
-//            values[i*4+1] = 1.0;
-//            values[i*4+2] = 0.0;
-//            values[i*4+3] = 0.01;
-//    }
-
     transferFunction->unbind();
     delete transferFunction;
 
@@ -222,6 +228,10 @@ void volWidget::resetTransferFunction(int a, int b, int c, int d){
 void volWidget::paintGL(void) {
 
     makeCurrent();
+
+    fps = 1000/(time->restart()+1);
+    cout<<fps<<endl;
+
     GLint* dims;
     //glGetIntegerv(GL_MAX_VIEWPORT_DIMS,dims);
     errorCheckFunc(__FILE__, __LINE__);
@@ -251,7 +261,8 @@ void volWidget::draw(void)
     shader->setUniform("textureDepth", volume->getTextureDepth());
     shader->setUniform("screenWidth", this->width());
     shader->setUniform("screenHeight",this->height());
-
+    shader->setUniform("numberOfSteps", numberOfSteps);
+    shader->setUniform("stepSize", stepSize);
     shader->setUniform("diagonal", volDiagonal);
     shader->setUniform("uX", &uX[0], 4, 1);
     shader->setUniform("uY", &uY[0], 4, 1);
@@ -263,11 +274,11 @@ void volWidget::draw(void)
 
     //Mesh Rendering:
     mesh->render();
-    cout << "Mesh rendered" << endl;
+    //cout << "Mesh rendered" << endl;
 
     shader->disable();
 
-    cout << rendPlaneCenter << endl;
+    //cout << rendPlaneCenter << endl;
 
     errorCheckFunc(__FILE__, __LINE__);
 }
