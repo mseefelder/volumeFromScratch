@@ -17,7 +17,8 @@ void volWidget::initializeGL() {
     // Glew Initialization:
     cout << "initializing glew ..." << endl;
 
-    glewExperimental=TRUE;
+    //glewExperimental=TRUE;
+    glewExperimental=true;
     GLenum glewInitResult = glewInit();
 
     errorCheckFunc(__FILE__, __LINE__);
@@ -87,9 +88,9 @@ void volWidget::initialize() {
     //Gradient calculation
     GLubyte* gradArray;
 
-    rootOfDepth = sqrt(volume->getTextureResolution()[2])
-    currentWidth = volume->getTextureResolution()[0]*(volume->getTextureResolution()[2]);
-    currentHeight = volume->getTextureResolution()[1]*root;
+    rootOfDepth = sqrt(volume->getTextureResolution()[2]);
+    currentWidth = volume->getTextureResolution()[0]*rootOfDepth;
+    currentHeight = volume->getTextureResolution()[1]*rootOfDepth;
     glViewport(0, 0, currentWidth, currentHeight);
     gradArray = new GLubyte[currentWidth*currentHeight];
 
