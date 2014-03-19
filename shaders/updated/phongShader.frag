@@ -47,7 +47,7 @@ void main(void)
         vec3 coord = (currentPos.xyz+volDimensions)*0.5/(volDimensions).xyz;
         if(coord.x<1.0 && coord.x>0.0 && coord.y<1.0 && coord.y>0.0 && coord.z<1.0 && coord.z>0.0){
             float voxelValue;
-            voxelValue = texture(volumeTexture, coord).r;
+            voxelValue = texture(volumeTexture, coord).a;
             curColor = texture(transferFunction, voxelValue);
 
             if(acColor.a < 1.0) {

@@ -90,6 +90,7 @@ private:
     //The volume container diagonal size and dimensions
     float volDiagonal;
     Eigen::Vector3f volDimensions;
+    int rootOfDepth
 
     //Number of steps and step size for rendering
     int numberOfSteps;
@@ -97,6 +98,7 @@ private:
 
     ///Shader
     Shader* shader;
+    Shader* gradShader;
 
     ///Testing Mesh
     Mesh* mesh;

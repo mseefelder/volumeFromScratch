@@ -39,6 +39,9 @@ void volWidget::initialize() {
     mesh = new Mesh;
     shader = new Shader("shaders/","phongShader",0);
 
+    gradShader = new Shader("shaders/","gradShader",0);
+    gradShader->initialize();
+
 /// VOLUME CONFIGURATION---------
 ///Other datasets:
 //    int* size = new int[3];
@@ -77,6 +80,34 @@ void volWidget::initialize() {
     //Initialize transfer function:
     initializeTransferFunction();
 
+    ///Texture binding
+    texIndex = volume->bindTexture();
+    TFid = transferFunction->bind();
+
+    //Gradient calculation
+    GLubyte* gradArray;
+
+    rootOfDepth = sqrt(volume->getTextureResolution()[2])
+    currentWidth = volume->getTextureResolution()[0]*(volume->getTextureResolution()[2]);
+    currentHeight = volume->getTextureResolution()[1]*root;
+    glViewport(0, 0, currentWidth, currentHeight);
+    gradArray = new GLubyte[currentWidth*currentHeight];
+
+    glClearColor(0.0,0.0,0.0,1.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    calculateGradient();
+    glReadPixels(1, 1, currentWidth, currentHeight, GL_RGBA, GL_UNSIGNED_BYTE, gradArray);
+
+    volume->setGradient(gradArray, currentWidth*currentHeight);
+
+    ///OVER
+
+    ///Adjust the viewport size
+    currentWidth = this->width();
+    currentHeight = this->height();
+    glViewport(0, 0, currentWidth, currentHeight);
+
     //Initializing Matrices
     cameraTrackball->initOpenGLMatrices();
     lightTrackball->initOpenGLMatrices();
@@ -86,11 +117,6 @@ void volWidget::initialize() {
     mesh->createQuad();
 
     shader->initialize();
-
-    ///Adjust the viewport size
-    currentWidth = this->width();
-    currentHeight = this->height();
-    glViewport(0, 0, currentWidth, currentHeight);
 
     //Perspective configuration. Not used yet, because I'm doing it ortogrphically.
     Eigen::Matrix4f projectionMatrix = cameraTrackball->createPerspectiveMatrix(60.0 , (float)currentWidth/(float)currentHeight, 1.0f , 100.0f );
@@ -107,9 +133,7 @@ void volWidget::initialize() {
     ///The initial rendPlaneCenter
     updateRendPlane();
 
-    ///Texture binding
-    texIndex = volume->bindTexture();
-    TFid = transferFunction->bind();
+
 
     //For fps counting
     time = new QTime();
@@ -244,6 +268,20 @@ void volWidget::paintGL(void) {
     draw();
 
 }
+
+///NEED TO CREATE THIS GRADSHADER
+void volWidget::calculateGradient(){
+
+    gradShader -> enable();
+    gradShader->setUniform("volumeTexture", texIndex);
+    gradShader->setUniform("volumeResolution", volume->getTextureResolution());
+    gradShader->setUniform("rootOfDepth", rootOfDepth);
+
+    mesh->render();
+
+    gradShader->disable();
+}
+///-----------------
 
 void volWidget::draw(void)
 {
