@@ -53,7 +53,7 @@ void Volume::loadVolume(){
     texture = new Texture();
     cout << "Texture instantiated." << endl;
     errorCheckFunc(__FILE__, __LINE__);
-    Id = texture->create(GL_TEXTURE_3D, GL_RG8, volSize[0], volSize[1], GL_RG, GL_UNSIGNED_BYTE, voxelArray, volSize[2]); // "Id =" because...
+    Id = texture->create(GL_TEXTURE_3D, GL_RGBA8, volSize[0], volSize[1], GL_RGBA, GL_UNSIGNED_BYTE, voxelArray, volSize[2]); // "Id =" because...
                                                         //...this funcion returns a GLuint value that represents the texture ID.
     errorCheckFunc(__FILE__, __LINE__);
     cout << "Texture created." << endl;
@@ -76,3 +76,39 @@ float Volume::getDiagonal(){
 Eigen::Vector3f Volume::getDimensions(){
     return realDimension;
 }
+
+///THIS IS NEW----------------
+void Volume::resetTexture(){
+    //texture = new Texture();
+
+    //cout << "Texture instantiated." << endl;
+    //errorCheckFunc(__FILE__, __LINE__);
+
+    //texture->unbind();
+
+    //Id = texture->create(GL_TEXTURE_3D, GL_RGBA8, volSize[0], volSize[1], GL_RGBA, GL_UNSIGNED_BYTE, voxelArray, volSize[2]); // "Id =" because...
+                                                        //...this funcion returns a GLuint value that represents the texture ID.
+    //errorCheckFunc(__FILE__, __LINE__);
+    //texture->setTexParameters(GL_CLAMP, GL_CLAMP, GL_CLAMP, GL_LINEAR, GL_LINEAR);
+
+    cout<<"Reseting volume texture"<<endl;
+
+    texture->update(voxelArray);
+
+    errorCheckFunc(__FILE__, __LINE__);
+
+    cout<<"Volume texture reset"<<endl;
+}
+
+void Volume::setGradient(GLubyte *gradArray, int dimensions){
+    for(int i = 0; i<dimensions; i+=4){
+        voxelArray[i] = (unsigned char)gradArray[i];
+        voxelArray[i+1] = (unsigned char)gradArray[i+1];
+        voxelArray[i+2] = (unsigned char)gradArray[i+2];
+    }
+
+    cout << "All set" << endl;
+
+    resetTexture();
+}
+///-------------------

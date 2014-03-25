@@ -13,9 +13,9 @@ uniform vec4 rendPlaneCenter;
 uniform vec3 volDimensions;
 uniform int screenWidth;
 uniform int screenHeight;
-
 uniform float layer;
-//in int ins;
+uniform int numberOfSteps;
+uniform float stepSize;
 
 uniform sampler3D volumeTexture;
 uniform sampler1D transferFunction;
@@ -26,29 +26,8 @@ out vec4 out_Color;
 void main(void)
 {
 
-    int numberOfSteps;
-    float stepSize;
-    numberOfSteps = (max(screenHeight, screenWidth));
-    stepSize = diagonal/numberOfSteps;
-
-    //out_Color = vec4(1.0, 1.0, 1.0 ,1.0);
     vec4 acColor = vec4(0.0, 0.0, 0.0, 1.0);
-/*
-    vec2 coord = vec2(gl_FragCoord.x/screenWidth, gl_FragCoord.y/screenHeight);
-    for (int i; i<(numberOfSteps-1); i++){
-        float voxelValue;
-        float where= i * 0.00390625;
-        voxelValue = texture(volumeTexture, vec3(coord, layer)).r;
-        acColor.x = acColor.x + voxelValue/numberOfSteps;
-    }
-
-
-    out_Color = acColor;
-*/
-///----------------------------------------------------------------------------------
-
-    acColor = vec4(0.0, 0.0, 0.0, 1.0);
-
+    vec4 curColor = vec4(0.0,0.0,0.0,0.0);
 
     vec3 fPos = vec3(gl_FragCoord.x/screenWidth, gl_FragCoord.y/screenHeight, 0.0);
     vec3 wFPos;
@@ -65,33 +44,40 @@ void main(void)
     currentPos = wFPos;
 
     for(int j; j<(numberOfSteps+1); j++){
-        //bvec3 isInsideTheVolume = lessThan(abs(currentPos), volDimensions);
-        //vec3 coord = ((currentPos.xyz+volDimensions)*0.5/(volDimensions)).xyz;
         vec3 coord = (currentPos.xyz+volDimensions)*0.5/(volDimensions).xyz;
-        //if(all(isInsideTheVolume) && all(lessThan(coord, vec3(1.0))) && all(greaterThan(coord, vec3(0.0)))){
         if(coord.x<1.0 && coord.x>0.0 && coord.y<1.0 && coord.y>0.0 && coord.z<1.0 && coord.z>0.0){
             float voxelValue;
-            voxelValue = texture(volumeTexture, coord).r;
+            voxelValue = texture(volumeTexture, coord).a;
+            curColor = texture(transferFunction, voxelValue);
+
+            if(acColor.a < 1.0) {
+
+                    acColor.rgb += curColor.rgb * curColor.a * acColor.a;
+                    acColor.a *= (1.0 - curColor.a);
+
+            }
+            else
+            {
+                    acColor.rgb = curColor.rgb * curColor.a;
+                    acColor.a = (1.0 - curColor.a);
+
+            }
+
             //acColor.x = acColor.x + 2*(voxelValue/numberOfSteps);
             //acColor.xyz = acColor.xyz + coord/numberOfSteps;
             //acColor.x = 1.0;
-            if(voxelValue > maxVal){
-                maxVal = voxelValue;
-            }
+
+            //if(voxelValue > acColor.x){
+            //   acColor.x = voxelValue;
+            // }
         }
-        else{
-            //acColor.xyz = acColor.xyz + vec3(0.0001);
-       }
+        //else{
+        //    acColor.xyz = acColor.xyz + vec3(0.0001);
+        //}
+
         currentPos = currentPos - stepSize*uZ.xyz;
         //currentPos = currentPos + 5*uZ.xyz;
     }
-    //acColor = 1.25*vec4(acColor.x, acColor.x, acColor.x, 1.0);
-    acColor.x = maxVal;
     out_Color = acColor;
-
-//-------------------------------------------------------------------------------------
-
-    //out_Color = vec4(uX.xyz,1.0);
-
 
 }

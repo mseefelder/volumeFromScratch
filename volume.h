@@ -38,7 +38,7 @@ public:
         volSize[0] = XSIZE; volSize[1] = YSIZE; volSize[2] = ZSIZE;
 
         ///Setting up the
-        int voxelArraySize = XSIZE*YSIZE*ZSIZE*2;
+        int voxelArraySize = XSIZE*YSIZE*ZSIZE*4;
         voxelArray = new GLubyte[voxelArraySize];
 
         ///Reading the texture file and sorting it in voxelArray
@@ -55,11 +55,13 @@ public:
             while (!file.eof()) //hardcoded number of bytes to read
             {
                 file.read(buff, 1);
-                voxelArray[i] = (unsigned char)buff[0];
+                voxelArray[i+3] = (unsigned char)buff[0];
+                voxelArray[i+2] = (unsigned char)0;
                 voxelArray[i+1] = (unsigned char)0;
-                i+=2;
+                voxelArray[i] = (unsigned char)0;
+                i+=4;
                 //i+=1;
-                iterations+=1;
+                //iterations+=1;
             }
             file.close();
             cout<<"Closed file: " << iterations << " voxels read." << endl;
@@ -84,6 +86,19 @@ public:
       @param Eigen::Vector3f with volume dimensions in "real world"
     **/
     Volume(char* filePath, int* vSize, Eigen::Vector3f dimension);
+
+    ///NEWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+    /**
+       @brief Receives a 8byte unsigned byte array and sets it as the gradient of the volume data
+       @param unsigned char array
+     **/
+    void setGradient(GLubyte* gradArray, int dimensions);
+
+    /**
+       @brief Resets the 3d texture with the latest voxelArray update
+     **/
+    void resetTexture();
+    ///-------------------------------------------------
 
     /**
       @brief Creates the volume container (parallelepiped) and the GL_TEXTURE_3D
@@ -120,8 +135,10 @@ public:
         return volSize[2];
     }
 
-    int * getTextureResolution() {
-        return volSize;
+    Eigen::Vector3f getTextureResolution() {
+        Eigen::Vector3f dimensions;
+        dimensions << volSize[0], volSize[1], volSize[2];
+        return dimensions;
     }
 
     //Volume(string fileName){}

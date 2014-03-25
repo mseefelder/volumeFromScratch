@@ -17,7 +17,7 @@ void volWidget::initializeGL() {
     // Glew Initialization:
     cout << "initializing glew ..." << endl;
 
-    glewExperimental=TRUE;
+    glewExperimental=GL_TRUE;
     GLenum glewInitResult = glewInit();
 
     errorCheckFunc(__FILE__, __LINE__);
@@ -37,7 +37,9 @@ void volWidget::initialize() {
     cameraTrackball = new Trackball;
     lightTrackball = new Trackball;
     mesh = new Mesh;
-    shader = new Shader("shaders/","phongShader",0);
+    shader = new Shader("shaders/","phongShader",1);
+
+    gradShader = new Shader("shaders/","gradShader",1);
 
 /// VOLUME CONFIGURATION---------
 ///Other datasets:
@@ -67,12 +69,14 @@ void volWidget::initialize() {
     ///The maximum parallellepiped diagonal and volume container dimensions
     volDiagonal = volume->getDiagonal();
     volDimensions = volume->getDimensions();
+    volResolution = volume->getTextureResolution();
 
     //Set number of steps and calculate step size:
-    int * vRes = volume->getTextureResolution();
+    Eigen::Vector3f vRes = volume->getTextureResolution();
     numberOfSteps = max(max(vRes[0], vRes[1]), vRes[2]);
     stepSize = volDiagonal/numberOfSteps;
-/// -----------------------------
+
+
 
     //Initialize transfer function:
     initializeTransferFunction();
@@ -85,12 +89,9 @@ void volWidget::initialize() {
 
     mesh->createQuad();
 
+    gradShader->initialize();
     shader->initialize();
 
-    ///Adjust the viewport size
-    currentWidth = this->width();
-    currentHeight = this->height();
-    glViewport(0, 0, currentWidth, currentHeight);
 
     //Perspective configuration. Not used yet, because I'm doing it ortogrphically.
     Eigen::Matrix4f projectionMatrix = cameraTrackball->createPerspectiveMatrix(60.0 , (float)currentWidth/(float)currentHeight, 1.0f , 100.0f );
@@ -115,12 +116,62 @@ void volWidget::initialize() {
     time = new QTime();
     time->start();
 
-    errorCheckFunc(__FILE__, __LINE__);
+    /// -----------------------------
+
+        rootOfDepth = sqrt(volume->getTextureResolution()[2]);
+        currentWidth = volume->getTextureResolution()[0]*rootOfDepth;
+        currentHeight = volume->getTextureResolution()[1]*rootOfDepth;
+        glViewport(0, 0, currentWidth, currentHeight);
+        gradArray = new GLubyte[currentWidth*currentHeight];
+
+        for (int i = 0; i < currentWidth*currentHeight; i++){
+            gradArray[i] = (unsigned char)1;
+        }
+
+        glClearColor(0.0,0.0,0.0,1.0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        calculateGradient();
+        glReadPixels(1, 1, currentWidth, currentHeight, GL_RGBA, GL_UNSIGNED_BYTE, gradArray);
+
+        errorCheckFunc(__FILE__, __LINE__);
+
+        volume->setGradient(gradArray, currentWidth*currentHeight);
+
+
+    /// -----------------------------
+
+        ///Texture binding
+        //texIndex = volume->bindTexture();
+        //TFid = transferFunction->bind();
+
+    ///Adjust the viewport size
+        currentWidth = this->width();
+        currentHeight = this->height();
+        glViewport(0, 0, currentWidth, currentHeight);
+
+        errorCheckFunc(__FILE__, __LINE__);
 
     //this->setMouseTracking(true);
 
 
 }
+
+///NEED TO CREATE THIS GRADSHADER
+void volWidget::calculateGradient(){
+
+    gradShader -> enable();
+    gradShader->setUniform("volumeTexture", texIndex);
+    gradShader->setUniform("volumeResolution", &volResolution[0], 3, 1);
+    gradShader->setUniform("rootOfDepth", rootOfDepth);
+
+    mesh->render();
+    glReadPixels(1, 1, currentWidth, currentHeight, GL_RGBA, GL_UNSIGNED_BYTE, gradArray);
+
+    gradShader->disable();
+    errorCheckFunc(__FILE__, __LINE__);
+}
+///-----------------
 
 void volWidget::initializeTransferFunction(){
 
@@ -140,10 +191,10 @@ void volWidget::initializeTransferFunction(){
 
     transferFunction = new Texture();
     cout << "TF initializing" << endl;
-    errorCheckFunc(__FILE__, __LINE__);
+    //errorCheckFunc(__FILE__, __LINE__);
     TFuid = transferFunction->create(GL_TEXTURE_1D, GL_RGBA32F, 256, 256, GL_RGBA, GL_FLOAT, values, 256); // "Id =" because...
                                                         //...this funcion returns a GLuint value that represents the texture ID.
-    errorCheckFunc(__FILE__, __LINE__);
+    //errorCheckFunc(__FILE__, __LINE__);
     cout << "TF created." << endl;
     transferFunction->setTexParameters(GL_CLAMP, GL_CLAMP, GL_CLAMP, GL_LINEAR, GL_LINEAR);
     cout << "TF parameters set." << endl;

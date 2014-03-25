@@ -1,0 +1,113 @@
+#version 430
+//#define tfIndex[r,g] = r + 256.0 * g
+
+uniform sampler1D transferFunction;
+uniform sampler3D volumeTexture;
+uniform vec3 volumeBoundaries;
+uniform vec4 e_x;
+uniform vec4 e_y;
+uniform vec4 e_z;
+uniform vec4 currentVertex;
+uniform int numberOfIterations;
+layout(RGBA32F) uniform image2D accumulatedColorTexture;
+
+layout (local_size_x = 1, local_size_y = 1) in;
+
+
+void main() {
+
+	//Empty Space Skipping Technique:
+	int emptySpaceSkippingFlag = 0;
+
+	float stepESS = 1.0;	
+
+	vec2 screenCoordinates = vec2(gl_GlobalInvocationID.xy)/vec2(gl_NumWorkGroups.xy);
+
+	vec4 accumulatedColors = imageLoad(accumulatedColorTexture,ivec2(gl_GlobalInvocationID.xy));
+
+	vec4 vertex;
+
+	for (int i =0; i<numberOfIterations; i++) {
+
+		if(emptySpaceSkippingFlag == 1){		
+			vertex = currentVertex + i*e_z;
+		}
+
+		else if(emptySpaceSkippingFlag == 0){
+			vertex = currentVertex + stepESS*i*e_z;
+		}
+
+		else if(emptySpaceSkippingFlag == -1){
+			vertex = currentVertex - (stepESS-1.0)*i*e_z;
+			emptySpaceSkippingFlag = 1;
+		}
+
+		vec3 currentPosition = (vertex + gl_GlobalInvocationID.x*e_x + gl_GlobalInvocationID.y*e_y).xyz;	
+		bvec3 isInsideTheVolume = lessThan(abs(currentPosition), volumeBoundaries);
+		vec3 coord = ((currentPosition.xyz+volumeBoundaries)*0.5/(volumeBoundaries)).xyz;	
+
+		if(all(isInsideTheVolume) && all(lessThan(coord, vec3(1.0))) && all(greaterThan(coord, vec3(0.0)))){
+
+			float opacity, accumulatedTransparency;
+
+			vec2 voxelValue;
+
+			vec4 currentColors;
+
+			//It's important to remeber that in order to access the volume position I need to normalize coordinates.
+		
+			voxelValue = texture(volumeTexture, coord).rg;
+
+			currentColors = texture(transferFunction, voxelValue.r);
+
+			
+    
+			//currentColors = vec4(voxelValue.rrr, 0.01);
+	
+			if(accumulatedColors.a < 1.0) {
+
+				accumulatedColors.rgb += currentColors.rgb * currentColors.a * accumulatedColors.a;
+   				accumulatedColors.a *= (1.0 - currentColors.a);
+	
+			}
+			else
+			{		
+				accumulatedColors.rgb = currentColors.rgb * currentColors.a;
+   				accumulatedColors.a = (1.0 - currentColors.a);
+
+			}
+
+			if(emptySpaceSkippingFlag == 0){
+				if(accumulatedColors.a > 0.0){
+					emptySpaceSkippingFlag = -1;
+				}
+			
+			}
+
+		
+		}
+	}
+
+	imageStore(accumulatedColorTexture, ivec2(gl_GlobalInvocationID.xy), accumulatedColors);
+	
+
+}
+
+/*
+	Ray Casting Equations:
+	Inicio				
+	opacity= d_TransferFunction[TF(R,G,opacidade)];
+	tAcc= (1.0-opacity);
+	cAccR= d_TransferFunction[TF(R,G,corR)] * opacity;
+	cAccG= d_TransferFunction[TF(R,G,corG)] * opacity;
+	cAccB= d_TransferFunction[TF(R,G,corB)] * opacity;
+
+	iteração
+	opacity= d_TransferFunction[TF(R,G,opacidade)];
+	cAccR+= d_TransferFunction[TF(R,G,corR)] * opacity * tAcc;
+	cAccG+= d_TransferFunction[TF(R,G,corG)] * opacity * tAcc;
+	cAccB+= d_TransferFunction[TF(R,G,corB)] * opacity * tAcc;
+	tAcc*= (1.0 - opacity);
+
+*/
+

@@ -68,6 +68,8 @@ public:
      */
     void volWidget::resetTransferFunction(int a, int b, int c, int d);
 
+    void volWidget::calculateGradient();
+
 signals:
 
 public slots:
@@ -90,6 +92,9 @@ private:
     //The volume container diagonal size and dimensions
     float volDiagonal;
     Eigen::Vector3f volDimensions;
+    Eigen::Vector3f volResolution;
+    int rootOfDepth;
+    GLubyte* gradArray;
 
     //Number of steps and step size for rendering
     int numberOfSteps;
@@ -97,6 +102,7 @@ private:
 
     ///Shader
     Shader* shader;
+    Shader* gradShader;
 
     ///Testing Mesh
     Mesh* mesh;
