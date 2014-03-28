@@ -1,0 +1,38 @@
+#version 430
+//#define tfIndex[r,g] = r + 256.0 * g
+uniform sampler3D baseTexture;
+uniform vec3 resolution;
+layout(RGBA32F) uniform image3D gradientTexture;
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+
+void main() {
+    vec4 accumulatedComponents = vec4(0);
+    float voxelValue = texelFetch(baseTexture, ivec2(gl_GlobalInvocationID.xyz);
+
+    accumulatedComponents = vec4(voxelValue);
+    }
+
+    imageStore(gradientTexture, ivec3(gl_GlobalInvocationID.xyz), accumulatedComponents);
+    
+
+}
+
+/*
+    Ray Casting Equations:
+    Inicio              
+    opacity= d_TransferFunction[TF(R,G,opacidade)];
+    tAcc= (1.0-opacity);
+    cAccR= d_TransferFunction[TF(R,G,corR)] * opacity;
+    cAccG= d_TransferFunction[TF(R,G,corG)] * opacity;
+    cAccB= d_TransferFunction[TF(R,G,corB)] * opacity;
+
+    iteração
+    opacity= d_TransferFunction[TF(R,G,opacidade)];
+    cAccR+= d_TransferFunction[TF(R,G,corR)] * opacity * tAcc;
+    cAccG+= d_TransferFunction[TF(R,G,corG)] * opacity * tAcc;
+    cAccB+= d_TransferFunction[TF(R,G,corB)] * opacity * tAcc;
+    tAcc*= (1.0 - opacity);
+
+*/
+

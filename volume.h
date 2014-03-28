@@ -20,64 +20,7 @@ public:
     /**
       @brief Default contructor, uses the "foot256x256x256x1.raw" 3D texture
     **/
-    Volume() {
-
-//        GLenum glewInitResult;
-
-//        //Glew Initialization:
-//        glewInitResult = glewInit();
-
-//        //Check Glew Initialization:
-//        if (GLEW_OK != glewInitResult) {
-//            cerr << "Error: " << glewGetErrorString(glewInitResult) << endl;
-//            exit(EXIT_FAILURE);
-//        }
-//        errorCheckFunc(__FILE__, __LINE__);
-
-        volSize = new int[3];
-        volSize[0] = XSIZE; volSize[1] = YSIZE; volSize[2] = ZSIZE;
-
-        ///Setting up the
-        int voxelArraySize = XSIZE*YSIZE*ZSIZE*4;
-        voxelArray = new GLubyte[voxelArraySize];
-
-        ///Reading the texture file and sorting it in voxelArray
-        ifstream file (FILENAME, ios::in|ios::binary);
-
-        char buff[128];
-        int i =0;
-
-        if(file.is_open())
-        {
-            cout << "3D texture file opened:"<<endl;
-            int iterations = 0; //for debug purpose
-            //while (!file.eof() && iterations<voxelArraySize)
-            while (!file.eof()) //hardcoded number of bytes to read
-            {
-                file.read(buff, 1);
-                voxelArray[i+3] = (unsigned char)buff[0];
-                voxelArray[i+2] = (unsigned char)0;
-                voxelArray[i+1] = (unsigned char)0;
-                voxelArray[i] = (unsigned char)0;
-                i+=4;
-                //i+=1;
-                //iterations+=1;
-            }
-            file.close();
-            cout<<"Closed file: " << iterations << " voxels read." << endl;
-        }
-        else cout << "Unable to open file!" << endl;
-
-        ///Initializing the mesh
-        mesh = new Mesh();
-        cout << "Mesh created." << endl;
-
-        realDimension << 1.0, 1.0, 1.0;
-
-        ///Loading the Volume
-        cout << "Entering loadVolume()" << endl;
-        loadVolume();
-    }
+    Volume();
 
     /**
       @brief Custom Volume constructor
@@ -93,6 +36,11 @@ public:
        @param unsigned char array
      **/
     void setGradient(GLubyte* gradArray, int dimensions);
+
+    /**
+       @brief Configures the compute shader, calculates the gradient based on the dataset, set result as the new texture
+     **/
+    void calculateGradient();
 
     /**
        @brief Resets the 3d texture with the latest voxelArray update
@@ -155,11 +103,18 @@ private:
     ///The mesh:
     Mesh* mesh;
 
-    ///The texture:
-    Texture* texture;
+    ///Shader:
+    Shader* gradShader;
 
-    ///The 3D texture id:
-    GLuint Id;
+    ///The main texture3D:
+    Texture* texture;
+    ///The main  3D texture id:
+    GLint Id;
+
+    ///The texture3D+gradient
+    Texture* scratchTexture;
+    ///The 3D texture + Gradient id:
+    GLint scratchId;
 
     ///Dimension of the volume in world space
     Eigen::Vector3f realDimension;

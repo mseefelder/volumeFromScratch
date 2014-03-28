@@ -39,7 +39,7 @@ void volWidget::initialize() {
     mesh = new Mesh;
     shader = new Shader("shaders/","phongShader",1);
 
-    gradShader = new Shader("shaders/","gradShader",1);
+    //gradShader = new Shader("shaders/","gradShader",1);
 
 /// VOLUME CONFIGURATION---------
 ///Other datasets:
@@ -89,7 +89,7 @@ void volWidget::initialize() {
 
     mesh->createQuad();
 
-    gradShader->initialize();
+    //gradShader->initialize();
     shader->initialize();
 
 
@@ -116,7 +116,7 @@ void volWidget::initialize() {
     time = new QTime();
     time->start();
 
-    /// -----------------------------
+    /*//------------------------------
 
         rootOfDepth = sqrt(volume->getTextureResolution()[2]);
         currentWidth = volume->getTextureResolution()[0]*rootOfDepth;
@@ -139,7 +139,7 @@ void volWidget::initialize() {
         volume->setGradient(gradArray, currentWidth*currentHeight);
 
 
-    /// -----------------------------
+    /// ----------------------------- */
 
         ///Texture binding
         //texIndex = volume->bindTexture();
