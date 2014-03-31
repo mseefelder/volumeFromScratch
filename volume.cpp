@@ -44,7 +44,7 @@ Volume::Volume(){
                     //iterations+=1;
                 }
                 file.close();
-                cout<<"Closed file: " << iterations << " voxels read." << endl;
+                cout<<"Closed file"<<endl; // << iterations << " voxels read." << endl;
             }
             else cout << "Unable to open file!" << endl;
 
@@ -112,7 +112,8 @@ void Volume::loadVolume(){
                                                         //...this funcion returns a GLuint value that represents the texture ID.
     errorCheckFunc(__FILE__, __LINE__);
     cout << "Texture created." << endl;
-    texture->setTexParameters(GL_CLAMP, GL_CLAMP, GL_CLAMP, GL_LINEAR, GL_LINEAR);
+    scratchTexture->setTexParameters(GL_CLAMP, GL_CLAMP, GL_CLAMP, GL_LINEAR, GL_LINEAR);
+    errorCheckFunc(__FILE__, __LINE__);
     cout << "Texture parameters set." << endl;
 
     cout<<"Texture successfully created!"<<endl;
@@ -161,9 +162,13 @@ void Volume::resetTexture(){
 }
 
 void Volume::calculateGradient(){
+    cout<<" Calculating gradient "<<endl;
+
     gradShader = new Shader("shaders/","gradShader",1);
     gradShader->initialize();
     gradShader->enable();
+
+    cout<<" Shader initialized "<<endl;
 
     texture = new Texture();
     Id = texture->create(GL_TEXTURE_3D, GL_RGBA8, volSize[0], volSize[1], GL_RGBA, GL_UNSIGNED_BYTE, NULL, volSize[2]);

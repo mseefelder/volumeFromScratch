@@ -34,11 +34,6 @@ void volWidget::initializeGL() {
 
 void volWidget::initialize() {
 
-    cameraTrackball = new Trackball;
-    lightTrackball = new Trackball;
-    mesh = new Mesh;
-    shader = new Shader("shaders/","phongShader",1);
-
     //gradShader = new Shader("shaders/","gradShader",1);
 
 /// VOLUME CONFIGURATION---------
@@ -61,10 +56,16 @@ void volWidget::initialize() {
 //    Eigen::Vector3f  dimension;
 //    dimension << 1.0, 1.0, 1.4;
 //    volume = new Volume("datasets/lobster301x324x56x1x1x1_4.raw",size, dimension);
-///
 
+
+    cout << "volWidget initialize"<<endl;
     volume = new Volume;
     cout << "Volume created" << endl;
+
+    cameraTrackball = new Trackball;
+    lightTrackball = new Trackball;
+    mesh = new Mesh;
+    shader = new Shader("shaders/","phongShader",1);
 
     ///The maximum parallellepiped diagonal and volume container dimensions
     volDiagonal = volume->getDiagonal();
