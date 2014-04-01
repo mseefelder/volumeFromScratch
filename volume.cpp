@@ -171,10 +171,11 @@ void Volume::calculateGradient(){
     cout<<" Shader initialized "<<endl;
 
     texture = new Texture();
-    Id = texture->create(GL_TEXTURE_3D, GL_RGBA8, volSize[0], volSize[1], GL_RGBA, GL_UNSIGNED_BYTE, NULL, volSize[2]);
+    //Id = texture->create(GL_TEXTURE_3D, GL_RGBA8, volSize[0], volSize[1], GL_RGBA, GL_UNSIGNED_BYTE, NULL, volSize[2]);
+    Id = texture->create(GL_TEXTURE_3D, GL_RGBA8, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, NULL, 256);
     texture->bindImageRW(Id);
 
-    scratchTexture->bind(scratchTexture);
+    scratchTexture->bind(scratchId);
 
     Eigen::Vector3f dimensions = getTextureResolution();
 
@@ -182,7 +183,8 @@ void Volume::calculateGradient(){
     gradShader->setUniform("gradientTexture", Id);
     gradShader->setUniform("resolution", &dimensions[0], 3, 1);
 
-    glDispatchCompute(volSize[0], volSize[1], volSize[2]);
+    //glDispatchCompute(volSize[0], volSize[1], volSize[2]);
+    glDispatchCompute(256, 256, 256);
 
     scratchTexture->unbind();
     texture->unbind();

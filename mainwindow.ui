@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>811</width>
-    <height>1034</height>
+    <width>1081</width>
+    <height>580</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,17 +25,17 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>791</width>
-      <height>791</height>
+      <width>501</width>
+      <height>501</height>
      </rect>
     </property>
    </widget>
    <widget class="QSlider" name="tf_A">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>810</y>
-      <width>791</width>
+      <x>520</x>
+      <y>20</y>
+      <width>551</width>
       <height>29</height>
      </rect>
     </property>
@@ -49,9 +49,9 @@
    <widget class="QSlider" name="tf_B">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>840</y>
-      <width>791</width>
+      <x>520</x>
+      <y>80</y>
+      <width>551</width>
       <height>29</height>
      </rect>
     </property>
@@ -65,28 +65,12 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QSlider" name="tf_C">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>870</y>
-      <width>791</width>
-      <height>29</height>
-     </rect>
-    </property>
-    <property name="maximum">
-     <number>256</number>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
    <widget class="QSlider" name="tf_D">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>900</y>
-      <width>791</width>
+      <x>520</x>
+      <y>200</y>
+      <width>551</width>
       <height>29</height>
      </rect>
     </property>
@@ -100,8 +84,8 @@
    <widget class="QPushButton" name="resetTF">
     <property name="geometry">
      <rect>
-      <x>340</x>
-      <y>940</y>
+      <x>730</x>
+      <y>260</y>
       <width>111</width>
       <height>27</height>
      </rect>
@@ -110,13 +94,29 @@
      <string>resetTF</string>
     </property>
    </widget>
+   <widget class="QSlider" name="tf_C">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>140</y>
+      <width>551</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>256</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>811</width>
+     <width>1081</width>
      <height>25</height>
     </rect>
    </property>
