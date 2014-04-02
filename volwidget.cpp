@@ -142,10 +142,6 @@ void volWidget::initialize() {
 
     /// ----------------------------- */
 
-        ///Texture binding
-        //texIndex = volume->bindTexture();
-        //TFid = transferFunction->bind();
-
     ///Adjust the viewport size
         currentWidth = this->width();
         currentHeight = this->height();
@@ -158,7 +154,7 @@ void volWidget::initialize() {
 
 }
 
-///NEED TO CREATE THIS GRADSHADER
+/*//NEED TO CREATE THIS GRADSHADER
 void volWidget::calculateGradient(){
 
     gradShader -> enable();
@@ -172,7 +168,7 @@ void volWidget::calculateGradient(){
     gradShader->disable();
     errorCheckFunc(__FILE__, __LINE__);
 }
-///-----------------
+//*/
 
 void volWidget::initializeTransferFunction(){
 
@@ -284,7 +280,7 @@ void volWidget::paintGL(void) {
     fps = 1000/(time->restart()+1);
     cout<<fps<<endl;
 
-    GLint* dims;
+    //GLint* dims;
     //glGetIntegerv(GL_MAX_VIEWPORT_DIMS,dims);
     errorCheckFunc(__FILE__, __LINE__);
 
@@ -306,6 +302,10 @@ void volWidget::draw(void)
 
     //SUPER COUT
     //cout<<"rPC: "<<rendPlaneCenter<< endl << "diag: "<<volDiagonal<<endl<<uX<<endl << uY<<endl<<uZ<< endl<< volDimensions <<endl;
+
+    ///Texture binding: NOT HERE
+    //texIndex = volume->bindTexture();
+    //TFid = transferFunction->bind();
 
     //Set the uniforms
     shader->setUniform("volumeTexture", texIndex);
@@ -329,6 +329,9 @@ void volWidget::draw(void)
     //cout << "Mesh rendered" << endl;
 
     shader->disable();
+
+    //volume->unbindTexture();
+    //transferFunction->bind();
 
     //cout << rendPlaneCenter << endl;
 

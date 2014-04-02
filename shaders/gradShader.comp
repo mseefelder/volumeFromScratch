@@ -1,16 +1,23 @@
 #version 430
-//#define tfIndex[r,g] = r + 256.0 * g
 uniform sampler3D baseTexture;
 uniform vec3 resolution;
-layout(RGBA32F) uniform image3D gradientTexture;
+layout (rgba8) uniform image3D gradientTexture;
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 
 void main() {
     vec4 accumulatedComponents = vec4(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, gl_GlobalInvocationID.z ,1.0);
-    //float voxelValue = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xyz));
+    float voxelValue = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xyz), 0);
+    vec3 valuePlus;
+    vec3 valueMinus;
+    valuePlus.x = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x+1 ,gl_GlobalInvocationID.yz), 0);
+    valuePlus.y = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x ,gl_GlobalInvocationID.y+1, gl_GlobalInvocationID.z), 0);
+    valuePlus.z = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xy ,gl_GlobalInvocationID.z+1), 0);
+    valueMinus.x = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x-1 ,gl_GlobalInvocationID.yz), 0);
+    valueMinus.y = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x ,gl_GlobalInvocationID.y-1, gl_GlobalInvocationID.z), 0);
+    valueMinus.z = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xy ,gl_GlobalInvocationID.z-1), 0);
 
-    //accumulatedComponents = vec4(voxelValue, voxelValue, voxelValue, voxelValue);
+    accumulatedComponents = normalize(vec4((valuePlus-valueMinus)/2.0, 0.0))+vec4(0.0,0.0,0.0,voxelValue);
 
     imageStore(gradientTexture, ivec3(gl_GlobalInvocationID.xyz), accumulatedComponents);
 }

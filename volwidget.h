@@ -41,34 +41,34 @@ public:
     /**
      * @brief Initializes the transfer function
      */
-    void volWidget::initializeTransferFunction();
+    void initializeTransferFunction();
 
     /**
      * @brief Is called when the mouse is pressed and moved over the Viewport
      */
-    void volWidget::mouseMoveEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
 
     /**
      * @brief Is called when the mouse is pressed
      */
-    void volWidget::mousePressEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
 
     /**
      * @brief Is called when the mouse is released
      */
-    void volWidget::mouseReleaseEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
 
     /**
      * @brief Recalculate the unit vectors
      */
-    void volWidget::updateUnitVectors();
+    void updateUnitVectors();
 
     /**
      * @brief Resets the transfer function
      */
-    void volWidget::resetTransferFunction(int a, int b, int c, int d);
+    void resetTransferFunction(int a, int b, int c, int d);
 
-    void volWidget::calculateGradient();
+    void calculateGradient();
 
 signals:
 
@@ -136,7 +136,7 @@ private:
 
     void draw(void);
 
-    int ins;
+    //int ins;
 
     float curLayer;
 

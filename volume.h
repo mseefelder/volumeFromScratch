@@ -58,12 +58,14 @@ public:
       @return Index to wich texture was binded
     **/
     int bindTexture();
+    void unbindTexture();
 
     /**
       @brief Returns the GL_TEXTURE_3D index
     **/
     GLuint getTexture3D() {
-        return Id;
+        //return Id;
+        return texture->texID();
     }
 
     /**
@@ -109,12 +111,12 @@ private:
     ///The main texture3D:
     Texture* texture;
     ///The main  3D texture id:
-    GLint Id;
+    //GLint Id;
 
     ///The texture3D+gradient
     Texture* scratchTexture;
     ///The 3D texture + Gradient id:
-    GLint scratchId;
+    //GLint scratchId;
 
     ///Dimension of the volume in world space
     Eigen::Vector3f realDimension;

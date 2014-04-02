@@ -25,6 +25,8 @@ private slots:
 
     void on_resetTF_clicked();
 
+    void on_saveImage_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

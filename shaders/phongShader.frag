@@ -43,12 +43,14 @@ void main(void)
     wFPos = (rendPlaneCenter+eX*uX+eY*uY).xyz;
     currentPos = wFPos;
 
+    vec3 lightDirection = vec3(1.0,0.0,0.0);
+
     for(int j; j<(numberOfSteps+1); j++){
         vec3 coord = (currentPos.xyz+volDimensions)*0.5/(volDimensions).xyz;
         if(coord.x<1.0 && coord.x>0.0 && coord.y<1.0 && coord.y>0.0 && coord.z<1.0 && coord.z>0.0){
-            float voxelValue;
-            voxelValue = texture(volumeTexture, coord).a;
-            curColor = texture(transferFunction, voxelValue);
+            vec4 voxelValue;
+            voxelValue = texture(volumeTexture, coord);
+            curColor = texture(transferFunction, voxelValue.a);
 
             if(acColor.a < 1.0) {
 
@@ -62,9 +64,11 @@ void main(void)
                     acColor.a = (1.0 - curColor.a);
 
             }
-
+            
+            //acColor.rgb = acColor.xyz * max(dot(lightDirection, voxelValue.xyz), 0.0);
+            
             //acColor.x = acColor.x + 2*(voxelValue/numberOfSteps);
-            //acColor.xyz = acColor.xyz + coord/numberOfSteps;
+            //acColor.xyz = acColor.xyz + abs(voxelValue.xyz/numberOfSteps); //GRADIENT MIX
             //acColor.x = 1.0;
 
             //if(voxelValue > acColor.x){
