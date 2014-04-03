@@ -49,3 +49,8 @@ void MainWindow::on_saveImage_clicked()
     QImage image = ui->widget->grabFrameBuffer(false);
     image.save(filename, "PNG");
 }
+
+void MainWindow::on_reloadShader_clicked()
+{
+    ui->widget->reloadShader();
+}

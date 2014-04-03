@@ -57,6 +57,12 @@ void volWidget::initialize() {
 //    dimension << 1.0, 1.0, 1.4;
 //    volume = new Volume("datasets/lobster301x324x56x1x1x1_4.raw",size, dimension);
 
+//    int* size = new int[3];
+//   size[0] = 150; size[1] = 150; size[2] = 276;
+//   Eigen::Vector3f  dimension;
+//    dimension << 1.5, 1.5, 2.76;
+//    volume = new Volume("datasets/mouse150x150x276_16u.raw",size, dimension); //16bits unsigned
+
 
     cout << "volWidget initialize"<<endl;
     volume = new Volume;
@@ -422,4 +428,8 @@ void volWidget::keyPressEvent(QKeyEvent *keyevent){
         resetTransferFunction(8, 64, 240, 256);
         cout << "F6 pressed, reseting transfer function...";
     }
+}
+
+void volWidget::reloadShader(){
+    shader->reloadShaders();
 }

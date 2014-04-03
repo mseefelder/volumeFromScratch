@@ -70,6 +70,8 @@ public:
 
     void calculateGradient();
 
+    void reloadShader();
+
 signals:
 
 public slots:

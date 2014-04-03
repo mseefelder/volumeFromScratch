@@ -27,6 +27,8 @@ private slots:
 
     void on_saveImage_clicked();
 
+    void on_reloadShader_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

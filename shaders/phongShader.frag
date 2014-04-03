@@ -38,15 +38,16 @@ void main(void)
 
     maxVal = 0.0;
 
-    eX = ((fPos.x*2.0)-1.0)*diagonal;
-    eY = ((fPos.y*2.0)-1.0)*diagonal;
+    eX = ((fPos.x*2.0)-1.0)*(diagonal/2.0);
+    eY = ((fPos.y*2.0)-1.0)*(diagonal/2.0);
     wFPos = (rendPlaneCenter+eX*uX+eY*uY).xyz;
     currentPos = wFPos;
 
     vec3 lightDirection = vec3(1.0,0.0,0.0);
 
     for(int j; j<(numberOfSteps+1); j++){
-        vec3 coord = (currentPos.xyz+volDimensions)*0.5/(volDimensions).xyz;
+        //vec3 coord = (currentPos.xyz+volDimensions)*0.5/(volDimensions).xyz;
+        vec3 coord = (currentPos.xyz/(volDimensions).xyz)+vec3(0.5);
         if(coord.x<1.0 && coord.x>0.0 && coord.y<1.0 && coord.y>0.0 && coord.z<1.0 && coord.z>0.0){
             vec4 voxelValue;
             voxelValue = texture(volumeTexture, coord);

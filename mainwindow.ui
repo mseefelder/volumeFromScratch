@@ -85,7 +85,7 @@
     <property name="geometry">
      <rect>
       <x>730</x>
-      <y>260</y>
+      <y>230</y>
       <width>111</width>
       <height>27</height>
      </rect>
@@ -114,13 +114,26 @@
     <property name="geometry">
      <rect>
       <x>730</x>
-      <y>290</y>
+      <y>260</y>
       <width>111</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
      <string>Save To Image</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="reloadShader">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>290</y>
+      <width>111</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Reload Shader</string>
     </property>
    </widget>
   </widget>
