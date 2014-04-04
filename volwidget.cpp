@@ -33,11 +33,9 @@ void volWidget::initializeGL() {
 }
 
 void volWidget::initialize() {
-
-    //gradShader = new Shader("shaders/","gradShader",1);
-
 /// VOLUME CONFIGURATION---------
 ///Other datasets:
+/*
 //    int* size = new int[3];
 //    size[0] = 64; size[1] = 64; size[2] = 64;
 //    Eigen::Vector3f  dimension;
@@ -62,7 +60,7 @@ void volWidget::initialize() {
 //   Eigen::Vector3f  dimension;
 //    dimension << 1.5, 1.5, 2.76;
 //    volume = new Volume("datasets/mouse150x150x276_16u.raw",size, dimension); //16bits unsigned
-
+*/
 
     cout << "volWidget initialize"<<endl;
     volume = new Volume;
@@ -72,6 +70,7 @@ void volWidget::initialize() {
     lightTrackball = new Trackball;
     mesh = new Mesh;
     shader = new Shader("shaders/","phongShader",1);
+    shader->initialize();
 
     ///The maximum parallellepiped diagonal and volume container dimensions
     volDiagonal = volume->getDiagonal();
@@ -83,10 +82,9 @@ void volWidget::initialize() {
     numberOfSteps = max(max(vRes[0], vRes[1]), vRes[2]);
     stepSize = volDiagonal/numberOfSteps;
 
-
-
-    //Initialize transfer function:
+    //Initialize transfer function and the jittering texture:
     initializeTransferFunction();
+    initializeJitteringTexture();
 
     //Initializing Matrices
     cameraTrackball->initOpenGLMatrices();
@@ -95,10 +93,6 @@ void volWidget::initialize() {
     cameraTrackball->initializeBuffers();
 
     mesh->createQuad();
-
-    //gradShader->initialize();
-    shader->initialize();
-
 
     //Perspective configuration. Not used yet, because I'm doing it ortogrphically.
     Eigen::Matrix4f projectionMatrix = cameraTrackball->createPerspectiveMatrix(60.0 , (float)currentWidth/(float)currentHeight, 1.0f , 100.0f );
@@ -118,35 +112,11 @@ void volWidget::initialize() {
     ///Texture binding
     texIndex = volume->bindTexture();
     TFid = transferFunction->bind();
+    JTid = jitteringTexture->bind();
 
     //For fps counting
     time = new QTime();
     time->start();
-
-    /*//------------------------------
-
-        rootOfDepth = sqrt(volume->getTextureResolution()[2]);
-        currentWidth = volume->getTextureResolution()[0]*rootOfDepth;
-        currentHeight = volume->getTextureResolution()[1]*rootOfDepth;
-        glViewport(0, 0, currentWidth, currentHeight);
-        gradArray = new GLubyte[currentWidth*currentHeight];
-
-        for (int i = 0; i < currentWidth*currentHeight; i++){
-            gradArray[i] = (unsigned char)1;
-        }
-
-        glClearColor(0.0,0.0,0.0,1.0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        calculateGradient();
-        glReadPixels(1, 1, currentWidth, currentHeight, GL_RGBA, GL_UNSIGNED_BYTE, gradArray);
-
-        errorCheckFunc(__FILE__, __LINE__);
-
-        volume->setGradient(gradArray, currentWidth*currentHeight);
-
-
-    /// ----------------------------- */
 
     ///Adjust the viewport size
         currentWidth = this->width();
@@ -159,22 +129,6 @@ void volWidget::initialize() {
 
 
 }
-
-/*//NEED TO CREATE THIS GRADSHADER
-void volWidget::calculateGradient(){
-
-    gradShader -> enable();
-    gradShader->setUniform("volumeTexture", texIndex);
-    gradShader->setUniform("volumeResolution", &volResolution[0], 3, 1);
-    gradShader->setUniform("rootOfDepth", rootOfDepth);
-
-    mesh->render();
-    glReadPixels(1, 1, currentWidth, currentHeight, GL_RGBA, GL_UNSIGNED_BYTE, gradArray);
-
-    gradShader->disable();
-    errorCheckFunc(__FILE__, __LINE__);
-}
-//*/
 
 void volWidget::initializeTransferFunction(){
 
@@ -206,6 +160,18 @@ void volWidget::initializeTransferFunction(){
 
     errorCheckFunc(__FILE__, __LINE__);
 
+}
+
+void volWidget::initializeJitteringTexture(){
+    int size = 32;
+    unsigned char* values = new unsigned char[size*size];
+    for (int i = 0; i<(size*size); i++)
+        values[i] = 255.0*rand()/(float)RAND_MAX;
+    jitteringTexture = new Texture();
+    JTuid = jitteringTexture->create(GL_TEXTURE_2D, GL_R8, size, size, GL_RED, GL_UNSIGNED_BYTE, values, 0);
+    jitteringTexture->setTexParameters(GL_REPEAT, GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST);
+
+    delete values;
 }
 
 void volWidget::resetTransferFunction(int a, int b, int c, int d){
@@ -282,19 +248,13 @@ void volWidget::resetTransferFunction(int a, int b, int c, int d){
 void volWidget::paintGL(void) {
 
     makeCurrent();
-
     fps = 1000/(time->restart()+1);
     cout<<fps<<endl;
-
-    //GLint* dims;
-    //glGetIntegerv(GL_MAX_VIEWPORT_DIMS,dims);
-    errorCheckFunc(__FILE__, __LINE__);
-
     glClearColor(0.0,0.0,0.0,1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //cout << this->width() << "w | " << this->height() << "h" << endl;
-    //cout << dims[0] << " " << dims[1] << endl;
+
     errorCheckFunc(__FILE__, __LINE__);
+
     draw();
 
 }
@@ -306,16 +266,14 @@ void volWidget::draw(void)
     updateRendPlane();
     updateUnitVectors();
 
-    //SUPER COUT
-    //cout<<"rPC: "<<rendPlaneCenter<< endl << "diag: "<<volDiagonal<<endl<<uX<<endl << uY<<endl<<uZ<< endl<< volDimensions <<endl;
-
-    ///Texture binding: NOT HERE
+    ///Texture binding: NOT HERE, because the texture manager keeps binding them to different units until there are no more units
     //texIndex = volume->bindTexture();
     //TFid = transferFunction->bind();
 
     //Set the uniforms
     shader->setUniform("volumeTexture", texIndex);
     shader->setUniform("transferFunction", TFid);
+    shader->setUniform("jitteringTexture", JTid);
     shader->setUniform("textureDepth", volume->getTextureDepth());
     shader->setUniform("screenWidth", this->width());
     shader->setUniform("screenHeight",this->height());
@@ -346,7 +304,6 @@ void volWidget::draw(void)
 
 void volWidget::mousePressEvent(QMouseEvent *event){
     Eigen::Vector2f screenPos;
-    ///screenPos << event->pos().x()/256.0, (256-(event->pos().y())/256.0);
     screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0, (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
     cameraTrackball->setInitialRotationPosition(screenPos);
     cameraTrackball->beginRotation();
@@ -365,15 +322,10 @@ void volWidget::mouseReleaseEvent(QMouseEvent *event){
 
 void volWidget::mouseMoveEvent(QMouseEvent *event){
 
-    //cout<<"inside"<< ins << endl;
-    //qDebug() << event->pos();
-    //ins += 1;
-
     setFocus();
 
     Eigen::Vector2f screenPos;
     screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0, (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
-    //cout<<screenPos<<endl;
     setLayer(screenPos[0]);
 
     if (cameraTrackball->isRotating()){
@@ -381,26 +333,14 @@ void volWidget::mouseMoveEvent(QMouseEvent *event){
         cameraTrackball->rotateCamera();
         cameraTrackball->setInitialRotationPosition(screenPos);
 
-        //updateUnitVectors();
-        //updateRendPlane();
         this->update();
-
-        //cout<<"Rotated"<<endl<<rendPlaneCenter<<endl;
     }
-
-        //cameraTrackball->setFinalRotationPosition(this->mouseReleaseEvent());
-        //cameraTrackball->calculateRotation();
-
-
 }
 
 void volWidget::updateRendPlane(){
-    //Eigen::Vector3f cameraPos;
-    //cameraPos = cameraTrackball->getCenter();
     rendPlaneCenter << cameraTrackball->getCenter(), 0.0;
     rendPlaneCenter.normalize();
     rendPlaneCenter << (volDiagonal/2.0)*rendPlaneCenter;
-
 }
 
 void volWidget::setLayer(float layer){
@@ -409,8 +349,6 @@ void volWidget::setLayer(float layer){
 
 void volWidget::updateUnitVectors(){
     Eigen::Affine3f projection, model, view, final;
-    //projection = cameraTrackball->getProjectionMatrix();
-    //model = cameraTrackball->getModelMatrix();
     view = cameraTrackball->getViewMatrix();
     final = view.inverse();
     uX << final.rotation() * Eigen::Vector3f(1.0,0.0,0.0) ,0.0;

@@ -19,13 +19,14 @@ uniform float stepSize;
 
 uniform sampler3D volumeTexture;
 uniform sampler1D transferFunction;
+uniform sampler2D jitteringTexture;
 uniform int textureDepth;
 
 out vec4 out_Color;
 
 void main(void)
 {
-
+    float pi = 2.1415;
     vec4 acColor = vec4(0.0, 0.0, 0.0, 1.0);
     vec4 curColor = vec4(0.0,0.0,0.0,0.0);
 
@@ -41,11 +42,12 @@ void main(void)
     eX = ((fPos.x*2.0)-1.0)*(diagonal/2.0);
     eY = ((fPos.y*2.0)-1.0)*(diagonal/2.0);
     wFPos = (rendPlaneCenter+eX*uX+eY*uY).xyz;
-    currentPos = wFPos;
+    currentPos = wFPos;// - normalize(uZ.xyz)*texelFetch(jitteringTexture, ivec2(gl_FragCoord.xy/32), 0).x;
 
-    vec3 lightDirection = vec3(1.0,0.0,0.0);
+    vec3 lightDirection = vec3(1.0,1.0,1.0);
+    float diffuseAcc;
 
-    for(int j; j<(numberOfSteps+1); j++){
+    for(int j; j<(numberOfSteps*2); j++){
         //vec3 coord = (currentPos.xyz+volDimensions)*0.5/(volDimensions).xyz;
         vec3 coord = (currentPos.xyz/(volDimensions).xyz)+vec3(0.5);
         if(coord.x<1.0 && coord.x>0.0 && coord.y<1.0 && coord.y>0.0 && coord.z<1.0 && coord.z>0.0){
@@ -66,23 +68,20 @@ void main(void)
 
             }
             
-            //acColor.rgb = acColor.xyz * max(dot(lightDirection, voxelValue.xyz), 0.0);
-            
-            //acColor.x = acColor.x + 2*(voxelValue/numberOfSteps);
-            //acColor.xyz = acColor.xyz + abs(voxelValue.xyz/numberOfSteps); //GRADIENT MIX
-            //acColor.x = 1.0;
+            //diffuseAcc = diffuseAcc + max(dot(lightDirection, voxelValue.xyz),0.0);
 
-            //if(voxelValue > acColor.x){
-            //   acColor.x = voxelValue;
-            // }
+            //acColor.rgb = acColor.xyz * max(dot(lightDirection, voxelValue.xyz), 0.0); //MAXIMUM ENCOUTERED BY THIS RAY
+            //acColor.xyz = acColor.xyz + abs(voxelValue.xyz/numberOfSteps); //GRADIENT MIX
         }
         //else{
         //    acColor.xyz = acColor.xyz + vec3(0.0001);
         //}
 
-        currentPos = currentPos - stepSize*uZ.xyz;
+        currentPos = currentPos - stepSize*uZ.xyz; //*texture(jitteringTexture, vec2(sin((gl_FragCoord.xy/32.0)*pi/2.0))).x;
         //currentPos = currentPos + 5*uZ.xyz;
     }
+    //diffuseAcc = diffuseAcc/numberOfSteps;
+    //acColor.xyz = 100*diffuseAcc*acColor.xyz;
     out_Color = acColor;
 
 }

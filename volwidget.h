@@ -44,6 +44,11 @@ public:
     void initializeTransferFunction();
 
     /**
+     * @brief Initializes the transfer function
+     */
+    void initializeJitteringTexture();
+
+    /**
      * @brief Is called when the mouse is pressed and moved over the Viewport
      */
     void mouseMoveEvent(QMouseEvent *event);
@@ -81,12 +86,15 @@ private:
     Volume* volume;
     GLint texIndex;
 
-    //Transfer Function
+    //Transfer Function and Jittering Texture
     Texture* transferFunction;
+    Texture* jitteringTexture;
 
     //Index of transfer Function
     GLuint TFuid;
     GLint TFid;
+    GLuint JTuid;
+    GLint JTid;
 
     //The unit vectors
     Eigen::Vector4f uX, uY, uZ;

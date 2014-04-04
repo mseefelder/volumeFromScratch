@@ -17,7 +17,7 @@ void main() {
     valueMinus.y = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x ,gl_GlobalInvocationID.y-1, gl_GlobalInvocationID.z), 0);
     valueMinus.z = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xy ,gl_GlobalInvocationID.z-1), 0);
 
-    accumulatedComponents = normalize(vec4((valuePlus-valueMinus)/2.0, 0.0))+vec4(0.0,0.0,0.0,voxelValue);
+    accumulatedComponents = vec4((valuePlus-valueMinus)/2.0, 0.0)+vec4(0.0,0.0,0.0,voxelValue);
 
     imageStore(gradientTexture, ivec3(gl_GlobalInvocationID.xyz), accumulatedComponents);
 }

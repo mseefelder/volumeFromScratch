@@ -31,21 +31,23 @@ public:
     Volume(char* filePath, int* vSize, Eigen::Vector3f dimension);
 
     ///NEWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-    /**
+    /*
        @brief Receives a 8byte unsigned byte array and sets it as the gradient of the volume data
        @param unsigned char array
-     **/
+
     void setGradient(GLubyte* gradArray, int dimensions);
+
+    /**
+       @brief Resets the 3d texture with the latest voxelArray update
+     *
+    void resetTexture();
+*/
 
     /**
        @brief Configures the compute shader, calculates the gradient based on the dataset, set result as the new texture
      **/
     void calculateGradient();
 
-    /**
-       @brief Resets the 3d texture with the latest voxelArray update
-     **/
-    void resetTexture();
     ///-------------------------------------------------
 
     /**
@@ -85,6 +87,9 @@ public:
         return volSize[2];
     }
 
+    /**
+      @brief Returns the dataset's XYZ resolution
+    **/
     Eigen::Vector3f getTextureResolution() {
         Eigen::Vector3f dimensions;
         dimensions << volSize[0], volSize[1], volSize[2];
@@ -110,13 +115,9 @@ private:
 
     ///The main texture3D:
     Texture* texture;
-    ///The main  3D texture id:
-    //GLint Id;
 
     ///The texture3D+gradient
     Texture* scratchTexture;
-    ///The 3D texture + Gradient id:
-    //GLint scratchId;
 
     ///Dimension of the volume in world space
     Eigen::Vector3f realDimension;

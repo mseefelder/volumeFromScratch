@@ -1,19 +1,6 @@
 #include "volume.h"
 
 Volume::Volume(){
-
-    //        GLenum glewInitResult;
-
-    //        //Glew Initialization:
-    //        glewInitResult = glewInit();
-
-    //        //Check Glew Initialization:
-    //        if (GLEW_OK != glewInitResult) {
-    //            cerr << "Error: " << glewGetErrorString(glewInitResult) << endl;
-    //            exit(EXIT_FAILURE);
-    //        }
-    //        errorCheckFunc(__FILE__, __LINE__);
-
             volSize = new int[3];
             volSize[0] = XSIZE; volSize[1] = YSIZE; volSize[2] = ZSIZE;
 
@@ -30,18 +17,11 @@ Volume::Volume(){
             if(file.is_open())
             {
                 cout << "3D texture file opened:"<<endl;
-                //int iterations = 0; //for debug purpose
-                //while (!file.eof() && iterations<voxelArraySize)
                 while (!file.eof()) //hardcoded number of bytes to read
                 {
                     file.read(buff, 1);
                     voxelArray[i] = (unsigned char)buff[0];
-                    //voxelArray[i+1] = (unsigned char)0;
-                    //voxelArray[i+2] = (unsigned char)0;
-                    //voxelArray[i+3] = (unsigned char)0;
                     i+=1;
-                    //i+=1;
-                    //iterations+=1;
                 }
                 file.close();
                 cout<<"Closed file"<<endl; // << iterations << " voxels read." << endl;
@@ -62,7 +42,6 @@ Volume::Volume(){
 Volume::Volume(char* filePath, int* vSize, Eigen::Vector3f dimension){
     cout << "Start" << endl;
     int voxelArraySize = vSize[0]*vSize[1]*vSize[2];
-    //volSize = new int[3];
     volSize = vSize;
     voxelArray = new GLubyte[voxelArraySize];
 
@@ -79,7 +58,6 @@ Volume::Volume(char* filePath, int* vSize, Eigen::Vector3f dimension){
         {
             file.read(buff, 1);
             voxelArray[i] = (unsigned char)buff[0];
-            //voxelArray[i+1] = (unsigned char)0;
             i+=1;
         }
         file.close();
@@ -107,7 +85,7 @@ void Volume::loadVolume(){
 
     scratchTexture = new Texture();
     cout << "Texture instantiated." << endl;
-    /*scratchId = */scratchTexture->create(GL_TEXTURE_3D, GL_R8, volSize[0], volSize[1], GL_RED, GL_UNSIGNED_BYTE, voxelArray, volSize[2]); // "Id =" because...
+    scratchTexture->create(GL_TEXTURE_3D, GL_R8, volSize[0], volSize[1], GL_RED, GL_UNSIGNED_BYTE, voxelArray, volSize[2]); // "Id =" because...
                                                         //...this funcion returns a GLuint value that represents the texture ID.
     cout << "Texture created." << endl;
     scratchTexture->setTexParameters(GL_CLAMP, GL_CLAMP, GL_CLAMP, GL_LINEAR, GL_LINEAR);
@@ -130,17 +108,6 @@ void Volume::unbindTexture(){
     texture->unbind();
 }
 
-float Volume::getDiagonal(){
-    float diagonal;
-    diagonal = sqrt(pow(realDimension[0], 2) + pow(realDimension[1], 2) + pow(realDimension[2], 2));
-    return diagonal;
-}
-
-Eigen::Vector3f Volume::getDimensions(){
-    return realDimension;
-}
-
-///THIS IS NEW----------------
 void Volume::calculateGradient(){
     cout<<" Calculating gradient "<<endl;
 
@@ -151,8 +118,7 @@ void Volume::calculateGradient(){
     cout<<" Shader initialized "<<endl;
 
     texture = new Texture();
-    /*Id =*/texture->create(GL_TEXTURE_3D, GL_RGBA8, volSize[0], volSize[1], GL_RGBA, GL_UNSIGNED_BYTE, NULL, volSize[2]);
-    // /*Id =*/ texture->create(GL_TEXTURE_3D, GL_RGBA8, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, NULL, 256);
+    texture->create(GL_TEXTURE_3D, GL_RGBA8, volSize[0], volSize[1], GL_RGBA, GL_UNSIGNED_BYTE, NULL, volSize[2]);
     GLuint unit = texture->bind();
     glBindImageTexture(unit, texture->texID(), 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
 
@@ -160,12 +126,11 @@ void Volume::calculateGradient(){
 
     Eigen::Vector3f dimensions = getTextureResolution();
 
-    gradShader->setUniform("baseTexture", baseUnit);//(GLint)scratchTexture->texID());
-    gradShader->setUniform("gradientTexture", (GLint)unit);//(GLint)texture->texID());
+    gradShader->setUniform("baseTexture", baseUnit);
+    gradShader->setUniform("gradientTexture", (GLint)unit);
     gradShader->setUniform("resolution", &dimensions[0], 3, 1);
 
     glDispatchCompute(volSize[0], volSize[1], volSize[2]);
-    //glDispatchCompute(256, 256, 256);
 
     glBindImageTexture(0, 0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
     scratchTexture->unbind();
@@ -173,7 +138,18 @@ void Volume::calculateGradient(){
     errorCheckFunc(__FILE__, __LINE__);
 }
 
-/*
+float Volume::getDiagonal(){
+    float diagonal;
+    diagonal = sqrt(pow(realDimension[0], 2) + pow(realDimension[1], 2) + pow(realDimension[2], 2));
+    return diagonal;
+}
+
+Eigen::Vector3f Volume::getDimensions(){
+    return realDimension;
+}
+
+
+/*----------------------------------------------------------------------------------------------------------
 void Volume::setGradient(GLubyte *gradArray, int dimensions){
     for(int i = 0; i<dimensions; i+=4){
         voxelArray[i] = (unsigned char)gradArray[i];
