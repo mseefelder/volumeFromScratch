@@ -120,7 +120,7 @@ void volWidget::initialize() {
 
     ///Adjust the viewport size
         currentWidth = this->width();
-        currentHeight = this->height();
+        currentHeight = this->width(); //this->height();
         glViewport(0, 0, currentWidth, currentHeight);
 
         errorCheckFunc(__FILE__, __LINE__);
@@ -163,7 +163,7 @@ void volWidget::initializeTransferFunction(){
 }
 
 void volWidget::initializeJitteringTexture(){
-    int size = 32;
+    int size = this->width();
     unsigned char* values = new unsigned char[size*size];
     for (int i = 0; i<(size*size); i++)
         values[i] = 255.0*rand()/(float)RAND_MAX;
