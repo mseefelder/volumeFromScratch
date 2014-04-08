@@ -22,13 +22,16 @@ uniform sampler1D transferFunction;
 uniform sampler2D jitteringTexture;
 uniform int textureDepth;
 
+uniform mat3 lightViewMatrix;
+
 out vec4 out_Color;
 
 void main(void)
 {   
     int substeps = 2;
     float pi = 2.1415;
-    vec4 acColor = vec4(0.0, 0.0, 0.0, 1.0);
+    vec4 acColor = vec4(0.0, 0.0, 0.0, 0.0);
+    vec4 acGrad = vec4(0.0,0.0,0.0,0.0);
     vec4 curColor = vec4(0.0);
 
     vec3 fPos = vec3(gl_FragCoord.x/screenWidth, gl_FragCoord.y/screenHeight, 0.0);
@@ -45,7 +48,10 @@ void main(void)
     wFPos = (rendPlaneCenter+eX*uX+eY*uY).xyz;
     currentPos = wFPos; // - normalize(uZ.xyz)*(texelFetch(jitteringTexture, ivec2(gl_FragCoord.xy), 0).x+0.00001);
 
-    vec3 lightDirection = vec3(1.0,0.0,0.0);
+    //vec3 lightDirection = vec3(0.0,1.0,0.0);
+    vec3 lightDirection = lightViewMatrix * vec3(0.0, 0.0, 1.0);
+    lightDirection = normalize(lightDirection);
+    
     float diffuseAcc;
 
     for(int j; j<(numberOfSteps*substeps); j++){
@@ -56,9 +62,11 @@ void main(void)
             voxelValue = texture(volumeTexture, coord);
             curColor = texture(transferFunction, voxelValue.a);
 
-            //acColor += (1.0 - acColor.a) * curColor;
+            //Compositing: Methodo 1
+            acColor += (1.0 - acColor.a) * curColor;
 
-            /**/
+            //Compositing: Methodo 2
+            /*
             if(acColor.a < 1.0) {
                     acColor.rgb += curColor.rgb * curColor.a * acColor.a;
                     acColor.a *= (1.0 - curColor.a);                    
@@ -69,8 +77,23 @@ void main(void)
                     acColor.a = (1.0 - curColor.a);                    
             }
             /**/
-            
-            //acColor += abs(voxelValue); //GRAD TESTING
+
+            //Compositing: Methodo= 3
+            /*
+            if(acColor.a < 1.0){
+            acColor.rgb += curColor.rgb*curColor.a;
+            acColor.a += curColor.a*curColor.a;
+            }
+            /**/
+
+            //acGrad += abs(voxelValue.a*voxelValue); //GRAD TESTING - method #1
+
+            //GRAD TESTING - method #2
+            /**/
+            if(acGrad.a < 1.0){
+            acGrad += (1.0 - acColor.a)*voxelValue;
+            }
+            /**/
 
             //diffuseAcc = diffuseAcc + max(dot(lightDirection, voxelValue.xyz),0.0);
 
@@ -90,12 +113,24 @@ void main(void)
     //accGrad = accGrad/(numberOfSteps*substeps);
     //acColor = acColor*max(dot(lightDirection, accGrad), 0.0);
     //out_Color = vec4(normalize(acColor.xyz), 1.0); //GRAD TESTING 
+    
+    /**/    
+    float limit = 0;
 
-    //acColor.xyz = normalize(acColor.xyz); //GRAD TESTING
-    //float comp = acColor.y; //GRAD TESTING
-    //out_Color = vec4(comp, comp, comp, 1.0); //GRAD TESTING
+    if (acGrad.a < limit){
+        acGrad = vec4(0.0);
+    }
+    else{
+        acGrad.xyz = normalize(acGrad.xyz); //GRAD TESTING
+        float comp = acGrad.y; //GRAD TESTING
+        out_Color = vec4(comp, comp, comp, 1.0); //GRAD TESTING 
+    }
 
+    acColor.xyz = normalize(acColor.xyz);
+    acColor = acColor * max(dot(lightDirection, acGrad.xyz), 0.0);//*vec4(1.0);
+    /**/
 
+    
     out_Color = acColor ;
 
 }

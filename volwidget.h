@@ -119,9 +119,11 @@ private:
 
     ///Trackball Object for the camera position.
     Trackball* cameraTrackball;
-
     ///Trackball object for lights position.
     Trackball* lightTrackball;
+    ///Contains both trackballs
+    Trackball** trackballs;
+    int tBallIndex;
 
     ///Current Viewport Width measured in pixels.
     int currentWidth;
@@ -152,6 +154,8 @@ private:
 
 protected:
     virtual void keyPressEvent(QKeyEvent *keyevent);
+
+    virtual void keyReleaseEvent(QKeyEvent *keyevent);
 };
 
 #endif // VOLWIDGET_H

@@ -33,6 +33,9 @@ void volWidget::initializeGL() {
 }
 
 void volWidget::initialize() {
+
+    tBallIndex = 0;
+
 /// VOLUME CONFIGURATION---------
 ///Other datasets:
 /*
@@ -68,6 +71,10 @@ void volWidget::initialize() {
 
     cameraTrackball = new Trackball;
     lightTrackball = new Trackball;
+    trackballs = new Trackball*[2];
+    trackballs[0] = cameraTrackball;
+    trackballs[1] = lightTrackball;
+
     mesh = new Mesh;
     shader = new Shader("shaders/","phongShader",1);
     shader->initialize();
@@ -271,6 +278,9 @@ void volWidget::draw(void)
     //TFid = transferFunction->bind();
 
     //Set the uniforms
+    Eigen::Matrix3f lightViewMatrix = lightTrackball->getViewMatrix().linear();
+    shader->setUniform("lightViewMatrix",lightViewMatrix.data(),3,GL_FALSE,1);
+
     shader->setUniform("volumeTexture", texIndex);
     shader->setUniform("transferFunction", TFid);
     shader->setUniform("jitteringTexture", JTid);
@@ -305,18 +315,19 @@ void volWidget::draw(void)
 void volWidget::mousePressEvent(QMouseEvent *event){
     Eigen::Vector2f screenPos;
     screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0, (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
-    cameraTrackball->setInitialRotationPosition(screenPos);
-    cameraTrackball->beginRotation();
+    trackballs[tBallIndex]->setInitialRotationPosition(screenPos);
+    trackballs[tBallIndex]->beginRotation();
     cout<<"rotation began"<<endl;
 }
 
 void volWidget::mouseReleaseEvent(QMouseEvent *event){
     Eigen::Vector2f screenPos;
+
     screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0, (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
-    if(cameraTrackball->isRotating()) {
-        cameraTrackball->endRotation();
+    if(trackballs[tBallIndex]->isRotating()) {
+        trackballs[tBallIndex]->endRotation();
         cout<<"rotation ended"<<endl;
-        cameraTrackball->setInitialRotationPosition(screenPos);
+        trackballs[tBallIndex]->setInitialRotationPosition(screenPos);
     }
 }
 
@@ -325,13 +336,14 @@ void volWidget::mouseMoveEvent(QMouseEvent *event){
     setFocus();
 
     Eigen::Vector2f screenPos;
+
     screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0, (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
     setLayer(screenPos[0]);
 
-    if (cameraTrackball->isRotating()){
-        cameraTrackball->setFinalRotationPosition(screenPos);
-        cameraTrackball->rotateCamera();
-        cameraTrackball->setInitialRotationPosition(screenPos);
+    if (trackballs[tBallIndex]->isRotating()){
+        trackballs[tBallIndex]->setFinalRotationPosition(screenPos);
+        trackballs[tBallIndex]->rotateCamera();
+        trackballs[tBallIndex]->setInitialRotationPosition(screenPos);
 
         this->update();
     }
@@ -365,6 +377,16 @@ void volWidget::keyPressEvent(QKeyEvent *keyevent){
     if (keyevent->key() == Qt::Key_F6){
         resetTransferFunction(8, 64, 240, 256);
         cout << "F6 pressed, reseting transfer function...";
+    }
+
+    if (keyevent->key() == Qt::Key_Control){
+        tBallIndex = 1;
+    }
+}
+
+void volWidget::keyReleaseEvent(QKeyEvent *keyevent){
+    if (keyevent->key() == Qt::Key_Control){
+        tBallIndex = 0;
     }
 }
 
