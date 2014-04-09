@@ -90,7 +90,8 @@ void main(void)
             //GRAD TESTING - method #2
             /**/
             if(acGrad.a < 1.0){
-            acGrad += (1.0 - acColor.a)*voxelValue;
+                acGrad += (1.0 - acColor.a)*voxelValue;
+                //acGrad += curColor.a*voxelValue;    
             }
             /**/
 
@@ -113,7 +114,7 @@ void main(void)
     //acColor = acColor*max(dot(lightDirection, accGrad), 0.0);
     //out_Color = vec4(normalize(acColor.xyz), 1.0); //GRAD TESTING 
     
-    /**/    
+    /*    
     float limit = 0;
 
     if (acGrad.a < limit){
@@ -124,12 +125,34 @@ void main(void)
         float comp = acGrad.y; //GRAD TESTING
         out_Color = vec4(comp, comp, comp, 1.0); //GRAD TESTING 
     }
+    /**/
+    //lightDirection = normalize(vec3(1.0,0.0,0.0));
+    //lightDirection = normalize(vec3(-1.0,0.0,0.0)); // Tudo preto
+    //lightDirection = normalize(vec3(0.0,1.0,0.0));
+    //lightDirection = normalize(vec3(0.0,-1.0,0.0)); //Tudo preto
+    //lightDirection = normalize(vec3(0.0,0.0,1.0));
+    //lightDirection = normalize(vec3(0.0,0.0,-1.0)); //Tudo preto
+    //Octante 1
+    //lightDirection = normalize(vec3(1.0,1.0,1.0));
+    //Octante 2
+    //lightDirection = normalize(vec3(1.0,1.0,-1.0));
+    //Octante 3 - começa a ficar estranho
+    //lightDirection = normalize(vec3(-1.0,1.0,-1.0));
+    //Octante 4
+    //lightDirection = normalize(vec3(-1.0,1.0,1.0));
+    //Octante 5
+    //lightDirection = normalize(vec3(1.0,-1.0,1.0));
+    //Octante 6
+    //lightDirection = normalize(vec3(1.0,-1.0,-1.0));
+    //Octante 7
+    //lightDirection = normalize(vec3(-1.0,-1.0,-1.0));
+    //Octante 8
+    //lightDirection = normalize(vec3(-1.0,-1.0,1.0));
 
     acColor.xyz = normalize(acColor.xyz);
-    acColor = 0.6 * acColor * max(dot(lightDirection, acGrad.xyz), 0.0) + 0.4 * acColor + 0.0 * acGrad;//*vec4(1.0);
+    acColor = 0.6 * vec4(1.0) * max(dot(lightDirection, acGrad.xyz), 0.0) + 0.4 * acColor + 0.0 * acGrad + 0.0 * vec4(normalize(lightDirection), 0.0) ;//*vec4(1.0);
     /**/
-
-    
+    acColor.a = 1.0;
     out_Color = acColor ;
 
 }
