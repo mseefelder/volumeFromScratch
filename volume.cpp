@@ -5,7 +5,7 @@ Volume::Volume(){
             volSize[0] = XSIZE; volSize[1] = YSIZE; volSize[2] = ZSIZE;
 
             ///Setting up the
-            int voxelArraySize = XSIZE*YSIZE*ZSIZE;
+            int voxelArraySize = XSIZE*YSIZE*ZSIZE*4;
             voxelArray = new GLubyte[voxelArraySize];
 
             ///Reading the texture file and sorting it in voxelArray
@@ -17,11 +17,14 @@ Volume::Volume(){
             if(file.is_open())
             {
                 cout << "3D texture file opened:"<<endl;
-                while (!file.eof()) //hardcoded number of bytes to read
+                while (!file.eof())
                 {
                     file.read(buff, 1);
-                    voxelArray[i] = (unsigned char)buff[0];
-                    i+=1;
+                    voxelArray[i+3] = (unsigned char)buff[0];
+                    voxelArray[i+2] = (unsigned char)0;
+                    voxelArray[i+1] = (unsigned char)0;
+                    voxelArray[i] = (unsigned char)0;
+                    i+=4;
                 }
                 file.close();
                 cout<<"Closed file"<<endl; // << iterations << " voxels read." << endl;
@@ -85,7 +88,7 @@ void Volume::loadVolume(){
 
     scratchTexture = new Texture();
     cout << "Texture instantiated." << endl;
-    scratchTexture->create(GL_TEXTURE_3D, GL_R8, volSize[0], volSize[1], GL_RED, GL_UNSIGNED_BYTE, voxelArray, volSize[2]); // "Id =" because...
+    scratchTexture->create(GL_TEXTURE_3D, GL_RGBA8, volSize[0], volSize[1], GL_RGBA, GL_UNSIGNED_BYTE, voxelArray, volSize[2]); // "Id =" because...
                                                         //...this funcion returns a GLuint value that represents the texture ID.
     cout << "Texture created." << endl;
     scratchTexture->setTexParameters(GL_CLAMP, GL_CLAMP, GL_CLAMP, GL_LINEAR, GL_LINEAR);
@@ -101,11 +104,11 @@ void Volume::loadVolume(){
 }
 
 int Volume::bindTexture(){
-    return texture->bind();
+    return scratchTexture->bind();
 }
 
 void Volume::unbindTexture(){
-    texture->unbind();
+    scratchTexture->unbind();
 }
 
 void Volume::calculateGradient(){
@@ -129,6 +132,30 @@ void Volume::calculateGradient(){
     gradShader->setUniform("baseTexture", baseUnit);
     gradShader->setUniform("gradientTexture", (GLint)unit);
     gradShader->setUniform("resolution", &dimensions[0], 3, 1);
+
+    glDispatchCompute(volSize[0], volSize[1], volSize[2]);
+
+    glBindImageTexture(0, 0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+    scratchTexture->unbind();
+    texture->unbind();
+
+    gradShader->disable();
+
+    smoothGrad = new Shader("shaders/","smoothGrad",1);
+    smoothGrad->initialize();
+    smoothGrad->enable();
+
+    cout<<" Shader initialized "<<endl;
+
+    //texture = new Texture();
+    //scratchTexture->create(GL_TEXTURE_3D, GL_RGBA8, volSize[0], volSize[1], GL_RGBA, GL_UNSIGNED_BYTE, NULL, volSize[2]);
+    unit = scratchTexture->bind();
+    glBindImageTexture(unit, scratchTexture->texID(), 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
+
+    baseUnit = texture->bind();
+
+    smoothGrad->setUniform("baseTexture", baseUnit);
+    smoothGrad->setUniform("gradientTexture", (GLint)unit);
 
     glDispatchCompute(volSize[0], volSize[1], volSize[2]);
 

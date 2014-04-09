@@ -67,7 +67,7 @@ public:
     **/
     GLuint getTexture3D() {
         //return Id;
-        return texture->texID();
+        return scratchTexture->texID();
     }
 
     /**
@@ -112,6 +112,7 @@ private:
 
     ///Shader:
     Shader* gradShader;
+    Shader* smoothGrad;
 
     ///The main texture3D:
     Texture* texture;

@@ -6,37 +6,39 @@ layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 
 void main() {
-    vec4 accumulatedComponents = vec4(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, gl_GlobalInvocationID.z ,1.0);
-    float voxelValue = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xyz), 0);
+    //vec4 accumulatedComponents = vec4(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, gl_GlobalInvocationID.z ,1.0);
+    vec4 accumulatedComponents = vec4(0.0);
+    int iterations = 5;
+    float voxelValue = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xyz), 0).a;
     vec3 valuePlus;
     vec3 valueMinus;
-    valuePlus.x = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x+1 ,gl_GlobalInvocationID.yz), 0);
-    valuePlus.y = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x ,gl_GlobalInvocationID.y+1, gl_GlobalInvocationID.z), 0);
-    valuePlus.z = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xy ,gl_GlobalInvocationID.z+1), 0);
-    valueMinus.x = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x-1 ,gl_GlobalInvocationID.yz), 0);
-    valueMinus.y = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x ,gl_GlobalInvocationID.y-1, gl_GlobalInvocationID.z), 0);
-    valueMinus.z = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xy ,gl_GlobalInvocationID.z-1), 0);
-
+    /**/
+    valuePlus.x = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x+1 ,gl_GlobalInvocationID.yz), 0).a;
+    valuePlus.y = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x ,gl_GlobalInvocationID.y+1, gl_GlobalInvocationID.z), 0).a;
+    valuePlus.z = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xy ,gl_GlobalInvocationID.z+1), 0).a;
+    valueMinus.x = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x-1 ,gl_GlobalInvocationID.yz), 0).a;
+    valueMinus.y = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x ,gl_GlobalInvocationID.y-1, gl_GlobalInvocationID.z), 0).a;
+    valueMinus.z = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xy ,gl_GlobalInvocationID.z-1), 0).a;
+    
     accumulatedComponents = vec4((valuePlus-valueMinus)/2.0, 0.0)+vec4(0.0,0.0,0.0,voxelValue);
+    /**/
+
+    /*
+    for(int Number; Number<iterations; Number++){
+    valuePlus.x = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x+Number ,gl_GlobalInvocationID.yz), 0).a;
+    valuePlus.y = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x ,gl_GlobalInvocationID.y+Number, gl_GlobalInvocationID.z), 0).a;
+    valuePlus.z = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xy ,gl_GlobalInvocationID.z+Number), 0).a;
+    valueMinus.x = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x-Number ,gl_GlobalInvocationID.yz), 0);
+    valueMinus.y = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x ,gl_GlobalInvocationID.y-Number, gl_GlobalInvocationID.z), 0).a;
+    valueMinus.z = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xy ,gl_GlobalInvocationID.z-Number), 0).a;
+
+    accumulatedComponents += (iterations-Number)*vec4((valuePlus-valueMinus)/2.0, 0.0);
+    }
+
+    accumulatedComponents = accumulatedComponents/(iterations*iterations) + vec4(0.0,0.0,0.0,voxelValue);
+    */
+
+    
 
     imageStore(gradientTexture, ivec3(gl_GlobalInvocationID.xyz), accumulatedComponents);
 }
-
-/*
-    Ray Casting Equations:
-    Inicio              
-    opacity= d_TransferFunction[TF(R,G,opacidade)];
-    tAcc= (1.0-opacity);
-    cAccR= d_TransferFunction[TF(R,G,corR)] * opacity;
-    cAccG= d_TransferFunction[TF(R,G,corG)] * opacity;
-    cAccB= d_TransferFunction[TF(R,G,corB)] * opacity;
-
-    iteração
-    opacity= d_TransferFunction[TF(R,G,opacidade)];
-    cAccR+= d_TransferFunction[TF(R,G,corR)] * opacity * tAcc;
-    cAccG+= d_TransferFunction[TF(R,G,corG)] * opacity * tAcc;
-    cAccB+= d_TransferFunction[TF(R,G,corB)] * opacity * tAcc;
-    tAcc*= (1.0 - opacity);
-
-*/
-

@@ -13,7 +13,6 @@ uniform vec4 rendPlaneCenter;
 uniform vec3 volDimensions;
 uniform int screenWidth;
 uniform int screenHeight;
-uniform float layer;
 uniform int numberOfSteps;
 uniform float stepSize;
 
@@ -127,7 +126,7 @@ void main(void)
     }
 
     acColor.xyz = normalize(acColor.xyz);
-    acColor = acColor * max(dot(lightDirection, acGrad.xyz), 0.0);//*vec4(1.0);
+    acColor = 0.6 * acColor * max(dot(lightDirection, acGrad.xyz), 0.0) + 0.4 * acColor + 0.0 * acGrad;//*vec4(1.0);
     /**/
 
     

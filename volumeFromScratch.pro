@@ -10,6 +10,7 @@ SHADERLIB_PATH = ../../resources/shader-lib
 GLEW_PATH = ../../resources/glew
 #GLEW_PATH  = ../../../Documents/glew-1.10.0
 
+
 QT += core gui opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets

@@ -36,7 +36,7 @@ public:
      **/
     virtual void paintGL();
 
-    void setLayer(float layer);
+    //void setLayer(float layer);
 
     /**
      * @brief Initializes the transfer function
@@ -73,7 +73,7 @@ public:
      */
     void resetTransferFunction(int a, int b, int c, int d);
 
-    void calculateGradient();
+    //void calculateGradient();
 
     void reloadShader();
 
@@ -151,6 +151,7 @@ private:
     //int ins;
 
     float curLayer;
+
 
 protected:
     virtual void keyPressEvent(QKeyEvent *keyevent);
