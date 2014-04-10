@@ -65,7 +65,7 @@ void main(void)
             acColor += (1.0 - acColor.a) * curColor;
 
             //Compositing: Methodo 2
-            /*
+            /**
             if(acColor.a < 1.0) {
                     acColor.rgb += curColor.rgb * curColor.a * acColor.a;
                     acColor.a *= (1.0 - curColor.a);                    
@@ -150,7 +150,11 @@ void main(void)
     //lightDirection = normalize(vec3(-1.0,-1.0,1.0));
 
     acColor.xyz = normalize(acColor.xyz);
-    acColor = 0.6 * vec4(1.0) * max(dot(lightDirection, acGrad.xyz), 0.0) + 0.4 * acColor + 0.0 * acGrad + 0.0 * vec4(normalize(lightDirection), 0.0) ;//*vec4(1.0);
+    acColor = 1.0 * vec4(1.0) * max(dot(lightDirection, acGrad.xyz), 0.0)
+            + 0.0 * acColor * max(dot(lightDirection, normalize(acGrad.xyz)), 0.0)
+            + 0.0 * acColor 
+            + (0.0) * normalize(acGrad) 
+            + 0.0 * vec4(normalize(lightDirection), 0.0) ;//*vec4(1.0);
     /**/
     acColor.a = 1.0;
     out_Color = acColor ;

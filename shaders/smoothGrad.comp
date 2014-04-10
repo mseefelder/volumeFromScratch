@@ -7,17 +7,43 @@ layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 void main() {
     vec3 smoothed = vec3(0.0);
+    float center, weight;
+    vec4 rasc;
 
+    center = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xyz), 0).a;
     
-    smoothed += texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x+1 ,gl_GlobalInvocationID.yz), 0).xyz;
-    smoothed += texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x ,gl_GlobalInvocationID.y+1, gl_GlobalInvocationID.z), 0).xyz;
-    smoothed += texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xy ,gl_GlobalInvocationID.z+1), 0).xyz;
-    smoothed += texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xyz), 0).xyz;
-    smoothed += texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x-1 ,gl_GlobalInvocationID.yz), 0).xyz;
-    smoothed += texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x ,gl_GlobalInvocationID.y-1, gl_GlobalInvocationID.z), 0).xyz;
-    smoothed += texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xy ,gl_GlobalInvocationID.z-1), 0).xyz;
+    //smoothed += texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x+2 ,gl_GlobalInvocationID.yz), 0).xyz;
+    //smoothed += texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x ,gl_GlobalInvocationID.y+2, gl_GlobalInvocationID.z), 0).xyz;
+    //smoothed += texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xy ,gl_GlobalInvocationID.z+2), 0).xyz;
 
-    smoothed = smoothed/7.0;
+    rasc = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID+ivec3(1,0,0)), 0);
+    smoothed += (abs(center-rasc.a))*rasc.xyz;
+    weight += (abs(center-rasc.a));
+    rasc = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID+ivec3(0,1,0)), 0);
+    smoothed += (abs(center-rasc.a))*rasc.xyz;
+    weight += (abs(center-rasc.a));
+    rasc = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID+ivec3(0,0,1)), 0);
+    smoothed += (abs(center-rasc.a))*rasc.xyz;
+    weight += (abs(center-rasc.a));
+    
+    smoothed += texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xyz), 0).xyz;
+    weight += 1.0;
+
+    rasc = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID-ivec3(1,0,0)), 0);
+    smoothed += (abs(center-rasc.a))*rasc.xyz;
+    weight += (abs(center-rasc.a));
+    rasc = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID-ivec3(0,1,0)), 0);
+    smoothed += (abs(center-rasc.a))*rasc.xyz;
+    weight += (abs(center-rasc.a));
+    rasc = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID-ivec3(0,0,1)), 0);
+    smoothed += (abs(center-rasc.a))*rasc.xyz;
+    weight += (abs(center-rasc.a));
+
+    //smoothed += texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x-2 ,gl_GlobalInvocationID.yz), 0).xyz;
+    //smoothed += texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.x ,gl_GlobalInvocationID.y-2, gl_GlobalInvocationID.z), 0).xyz;
+    //smoothed += texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xy ,gl_GlobalInvocationID.z-2), 0).xyz;
+
+    smoothed = smoothed/weight;
 
     vec4 finalVector = vec4(0.0);
     float scalar = texelFetch(baseTexture, ivec3(gl_GlobalInvocationID.xyz), 0).w;
