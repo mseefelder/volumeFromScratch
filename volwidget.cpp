@@ -61,6 +61,7 @@ void volWidget::initialize() {
 
     cout << "volWidget initialize"<<endl;
     volume = new Volume;
+    //volume = new Volume(true);
     cout << "Volume created" << endl;
 
     mesh = new Mesh;

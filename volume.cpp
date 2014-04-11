@@ -78,6 +78,31 @@ Volume::Volume(char* filePath, int* vSize, Eigen::Vector3f dimension){
     loadVolume();
 }
 
+Volume::Volume(bool sphere){
+
+    volSize = new int[3];
+    volSize[0] = XSIZE; volSize[1] = YSIZE; volSize[2] = ZSIZE;
+
+    mesh = new Mesh();
+    realDimension << 1.0, 1.0, 1.0;
+    mesh -> createParallelepiped(realDimension[0], realDimension[1], realDimension[1]);
+
+    scratchTexture->create(GL_TEXTURE_3D, GL_RGBA8, volSize[0], volSize[1], GL_RGBA, GL_UNSIGNED_BYTE, NULL, volSize[2]);
+    GLuint Sunit = scratchTexture->bind();
+    glBindImageTexture(Sunit, texture->texID(), 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
+
+    sphereShader = new Shader("shaders/","sphereShader",2);
+    sphereShader->initialize();
+    sphereShader->enable();
+    sphereShader->setUniform("gradientTexture", (GLint)Sunit);
+
+    glDispatchCompute(volSize[0], volSize[1], volSize[2]);
+    glBindImageTexture(0, 0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+    scratchTexture->unbind();
+
+    calculateGradient();
+}
+
 void Volume::loadVolume(){
     cout << "Loading volume..."<<endl;
     cout << volSize[0] << " " << volSize[1] << " " << volSize[2] << endl;

@@ -30,6 +30,8 @@ public:
     **/
     Volume(char* filePath, int* vSize, Eigen::Vector3f dimension);
 
+    Volume(bool sphere);
+
     ///NEWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
     /*
        @brief Receives a 8byte unsigned byte array and sets it as the gradient of the volume data
@@ -113,6 +115,7 @@ private:
     ///Shader:
     Shader* gradShader;
     Shader* smoothGrad;
+    Shader* sphereShader;
 
     ///The main texture3D:
     Texture* texture;
