@@ -38,7 +38,7 @@ void main(void)
     vec3 currentPos;
     vec3 volDimHalf = volDimensions/2.0;
 
-    float eX, eY, maxVal;
+    float eX, eY, maxVal, alpha;
 
     maxVal = 0.0;
 
@@ -59,10 +59,12 @@ void main(void)
         if(coord.x<1.0 && coord.x>0.0 && coord.y<1.0 && coord.y>0.0 && coord.z<1.0 && coord.z>0.0){
             vec4 voxelValue;
             voxelValue = texture(volumeTexture, coord);
+            //voxelValue.xyz = (voxelValue.xyz*2.0) - vec3(1.0);
             curColor = texture(transferFunction, voxelValue.a);
 
             //Compositing: Methodo 1
-            acColor += (1.0 - acColor.a) * curColor;
+            alpha = acColor.a;
+            acColor += (1.0 - alpha) * curColor;
 
             //Compositing: Methodo 2
             /**
@@ -90,7 +92,7 @@ void main(void)
             //GRAD TESTING - method #2
             /**/
             if(acGrad.a < 1.0){
-                acGrad += (1.0 - acColor.a)*voxelValue;
+                acGrad += (1.0 - alpha)*voxelValue;
                 //acGrad += curColor.a*voxelValue;    
             }
             /**/
@@ -150,9 +152,9 @@ void main(void)
     //lightDirection = normalize(vec3(-1.0,-1.0,1.0));
 
     acColor.xyz = normalize(acColor.xyz);
-    acColor = 1.0 * vec4(1.0) * max(dot(lightDirection, acGrad.xyz), 0.0)
-            + 0.0 * acColor * max(dot(lightDirection, normalize(acGrad.xyz)), 0.0)
-            + 0.0 * acColor 
+    acColor = 0.1 * vec4(1.0) * max(dot(lightDirection, acGrad.xyz), 0.0)
+            + 0.5 * acColor * max(dot(lightDirection, normalize(acGrad.xyz)), 0.0)
+            + 0.4 * acColor 
             + (0.0) * normalize(acGrad) 
             + 0.0 * vec4(normalize(lightDirection), 0.0) ;//*vec4(1.0);
     /**/

@@ -89,6 +89,8 @@ void volWidget::initialize() {
     TFid = transferFunction->bind();
     JTid = jitteringTexture->bind();
 
+    cout << "Textures bound" << endl;
+
     ///Trackballs
     cameraTrackball = new Trackball;
     lightTrackball = new Trackball;
@@ -97,9 +99,13 @@ void volWidget::initialize() {
     trackballs[1] = lightTrackball;
     tBallIndex = 0; //currently 'active' trackball, used for rotation
 
+    cout << "Trackballs set" << endl;
+
     ///Initializing Matrices
     cameraTrackball->initOpenGLMatrices();
     lightTrackball->initOpenGLMatrices();
+
+    cout << "Matrices initialized" << endl;
 
     ///Trackball Shader an buffer generation, not used yet:
     //cameraTrackball->initializeBuffers();
@@ -127,6 +133,8 @@ void volWidget::initialize() {
     glViewport(0, 0, currentWidth, currentHeight);
 
     errorCheckFunc(__FILE__, __LINE__);
+
+    cout << "Initialized!" << endl;
 }
 
 void volWidget::initializeTransferFunction(){

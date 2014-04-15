@@ -1,3 +1,4 @@
+#include <QWidget>
 #include <QApplication>
 #include "mainwindow.h"
 

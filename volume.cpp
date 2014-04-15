@@ -146,9 +146,9 @@ void Volume::calculateGradient(){
     cout<<" Shader initialized "<<endl;
 
     texture = new Texture();
-    texture->create(GL_TEXTURE_3D, GL_RGBA8, volSize[0], volSize[1], GL_RGBA, GL_UNSIGNED_BYTE, NULL, volSize[2]);
+    texture->create(GL_TEXTURE_3D, GL_RGBA16F, volSize[0], volSize[1], GL_RGBA, GL_HALF_FLOAT, NULL, volSize[2]);
     GLuint unit = texture->bind();
-    glBindImageTexture(unit, texture->texID(), 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
+    glBindImageTexture(unit, texture->texID(), 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
 
     GLint baseUnit = scratchTexture->bind();
 
@@ -164,6 +164,14 @@ void Volume::calculateGradient(){
     scratchTexture->unbind();
     texture->unbind();
 
+    delete scratchTexture;
+    scratchTexture = new Texture();
+    cout << "Texture instantiated." << endl;
+    scratchTexture->create(GL_TEXTURE_3D, GL_RGBA16F, volSize[0], volSize[1], GL_RGBA, GL_HALF_FLOAT, NULL, volSize[2]);
+    cout << "Texture created." << endl;
+    scratchTexture->setTexParameters(GL_CLAMP, GL_CLAMP, GL_CLAMP, GL_LINEAR, GL_LINEAR);
+    errorCheckFunc(__FILE__, __LINE__);
+
     gradShader->disable();
 
     smoothGrad = new Shader("shaders/","smoothGrad",1);
@@ -175,14 +183,21 @@ void Volume::calculateGradient(){
     //texture = new Texture();
     //scratchTexture->create(GL_TEXTURE_3D, GL_RGBA8, volSize[0], volSize[1], GL_RGBA, GL_UNSIGNED_BYTE, NULL, volSize[2]);
     unit = scratchTexture->bind();
-    glBindImageTexture(unit, scratchTexture->texID(), 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
+    glBindImageTexture(unit, scratchTexture->texID(), 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F);
 
     baseUnit = texture->bind();
+    glBindImageTexture(baseUnit, scratchTexture->texID(), 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA16F); // may err
 
     smoothGrad->setUniform("baseTexture", baseUnit);
     smoothGrad->setUniform("gradientTexture", (GLint)unit);
 
     glDispatchCompute(volSize[0], volSize[1], volSize[2]);
+
+    smoothGrad->setUniform("baseTexture", (GLint)unit);
+    smoothGrad->setUniform("gradientTexture", baseUnit);
+
+    glDispatchCompute(volSize[0], volSize[1], volSize[2]);
+
 
     glBindImageTexture(0, 0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
     scratchTexture->unbind();
