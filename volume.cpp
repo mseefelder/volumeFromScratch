@@ -44,7 +44,7 @@ Volume::Volume(){
 
 Volume::Volume(char* filePath, int* vSize, Eigen::Vector3f dimension){
     cout << "Start" << endl;
-    int voxelArraySize = vSize[0]*vSize[1]*vSize[2];
+    int voxelArraySize = vSize[0]*vSize[1]*vSize[2]*4;
     volSize = vSize;
     voxelArray = new GLubyte[voxelArraySize];
 
@@ -60,8 +60,11 @@ Volume::Volume(char* filePath, int* vSize, Eigen::Vector3f dimension){
         while (!file.eof())
         {
             file.read(buff, 1);
-            voxelArray[i] = (unsigned char)buff[0];
-            i+=1;
+            voxelArray[i+3] = (unsigned char)buff[0];
+            voxelArray[i+2] = (unsigned char)0;
+            voxelArray[i+1] = (unsigned char)0;
+            voxelArray[i] = (unsigned char)0;
+            i+=4;
         }
         file.close();
     }
@@ -197,7 +200,17 @@ void Volume::calculateGradient(){
     smoothGrad->setUniform("gradientTexture", baseUnit);
 
     glDispatchCompute(volSize[0], volSize[1], volSize[2]);
+/*
+    smoothGrad->setUniform("baseTexture", baseUnit);
+    smoothGrad->setUniform("gradientTexture", (GLint)unit);
 
+    glDispatchCompute(volSize[0], volSize[1], volSize[2]);
+
+    smoothGrad->setUniform("baseTexture", (GLint)unit);
+    smoothGrad->setUniform("gradientTexture", baseUnit);
+
+    glDispatchCompute(volSize[0], volSize[1], volSize[2]);
+*/
 
     glBindImageTexture(0, 0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
     scratchTexture->unbind();

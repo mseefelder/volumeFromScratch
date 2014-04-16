@@ -64,6 +64,8 @@ void main(void)
 
             //Compositing: Methodo 1
             alpha = acColor.a;
+            //curColor.xyz = 0.9*curColor.xyz * max(dot(lightDirection, normalize(voxelValue.xyz)), 0.0)
+            //            + 0.1*curColor.xyz;
             acColor += (1.0 - alpha) * curColor;
 
             //Compositing: Methodo 2
@@ -92,8 +94,10 @@ void main(void)
             //GRAD TESTING - method #2
             /**/
             if(acGrad.a < 1.0){
-                acGrad += (1.0 - alpha)*voxelValue;
-                //acGrad += curColor.a*voxelValue;    
+                if(curColor.a != 0){
+                    acGrad += (1.0 - alpha)*(voxelValue);
+                    //acGrad += curColor.a*voxelValue;    
+                }            
             }
             /**/
 
@@ -109,15 +113,9 @@ void main(void)
         currentPos = currentPos - (stepSize/substeps)*uZ.xyz; //*texture(jitteringTexture, vec2(sin((gl_FragCoord.xy/32.0)*pi/2.0))).x;
         //currentPos = currentPos + 5*uZ.xyz;
     }
-    //diffuseAcc = diffuseAcc/numberOfSteps;
-    //acColor.xyz = 100*diffuseAcc*acColor.xyz;
-
-    //accGrad = accGrad/(numberOfSteps*substeps);
-    //acColor = acColor*max(dot(lightDirection, accGrad), 0.0);
-    //out_Color = vec4(normalize(acColor.xyz), 1.0); //GRAD TESTING 
     
-    /*    
-    float limit = 0;
+
+    float limit = 0.8;
 
     if (acGrad.a < limit){
         acGrad = vec4(0.0);
@@ -127,18 +125,31 @@ void main(void)
         float comp = acGrad.y; //GRAD TESTING
         out_Color = vec4(comp, comp, comp, 1.0); //GRAD TESTING 
     }
-    /**/
+
+    
+    acColor.xyz = normalize(acColor.xyz);
+    acColor = 0.1 * vec4(1.0) * max(dot(lightDirection, acGrad.xyz), 0.0)
+            + 0.7 * acColor * max(dot(lightDirection, normalize(acGrad.xyz)), 0.0)
+            + 0.2 * acColor 
+            + (0.0) * normalize(acGrad) 
+            + 0.0 * vec4(normalize(lightDirection), 0.0) ;//*vec4(1.0);
+
+    acColor.a = 1.0;
+    out_Color = acColor ;
+
+}
+
     //lightDirection = normalize(vec3(1.0,0.0,0.0));
-    //lightDirection = normalize(vec3(-1.0,0.0,0.0)); // Tudo preto
+    //lightDirection = normalize(vec3(-1.0,0.0,0.0));
     //lightDirection = normalize(vec3(0.0,1.0,0.0));
-    //lightDirection = normalize(vec3(0.0,-1.0,0.0)); //Tudo preto
+    //lightDirection = normalize(vec3(0.0,-1.0,0.0));
     //lightDirection = normalize(vec3(0.0,0.0,1.0));
-    //lightDirection = normalize(vec3(0.0,0.0,-1.0)); //Tudo preto
+    //lightDirection = normalize(vec3(0.0,0.0,-1.0));
     //Octante 1
     //lightDirection = normalize(vec3(1.0,1.0,1.0));
     //Octante 2
     //lightDirection = normalize(vec3(1.0,1.0,-1.0));
-    //Octante 3 - começa a ficar estranho
+    //Octante 3
     //lightDirection = normalize(vec3(-1.0,1.0,-1.0));
     //Octante 4
     //lightDirection = normalize(vec3(-1.0,1.0,1.0));
@@ -150,15 +161,3 @@ void main(void)
     //lightDirection = normalize(vec3(-1.0,-1.0,-1.0));
     //Octante 8
     //lightDirection = normalize(vec3(-1.0,-1.0,1.0));
-
-    acColor.xyz = normalize(acColor.xyz);
-    acColor = 0.1 * vec4(1.0) * max(dot(lightDirection, acGrad.xyz), 0.0)
-            + 0.5 * acColor * max(dot(lightDirection, normalize(acGrad.xyz)), 0.0)
-            + 0.4 * acColor 
-            + (0.0) * normalize(acGrad) 
-            + 0.0 * vec4(normalize(lightDirection), 0.0) ;//*vec4(1.0);
-    /**/
-    acColor.a = 1.0;
-    out_Color = acColor ;
-
-}

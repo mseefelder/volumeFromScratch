@@ -32,7 +32,7 @@ void volWidget::initialize() {
 
     /// VOLUME CONFIGURATION---------
     ///Other datasets:
-    /*
+
 //    int* size = new int[3];
 //    size[0] = 64; size[1] = 64; size[2] = 64;
 //    Eigen::Vector3f  dimension;
@@ -57,7 +57,7 @@ void volWidget::initialize() {
 //   Eigen::Vector3f  dimension;
 //    dimension << 1.5, 1.5, 2.76;
 //    volume = new Volume("datasets/mouse150x150x276_16u.raw",size, dimension); //16bits unsigned
-*/
+
 
     cout << "volWidget initialize"<<endl;
     volume = new Volume;
@@ -344,7 +344,7 @@ void volWidget::resetTransferFunction(int a, int b, int c, int d){
         values[i*4] = 1.0;
         values[i*4+1] = 1.0;
         values[i*4+2] = 1.0;
-        values[i*4+3] = 0.05;
+        values[i*4+3] = 0.05*10.0;
     }
 
     float dividerCD = 1.0*(d-c);
@@ -352,7 +352,7 @@ void volWidget::resetTransferFunction(int a, int b, int c, int d){
         values[i*4] = 1.0*((i-c)/dividerCD);
         values[i*4+1] = 1.0;
         values[i*4+2] = 1.0;
-        values[i*4+3] = 0.01*((i-c)/dividerCD);
+        values[i*4+3] = 0.01*((i-c)/dividerCD)*5.0;
     }
 
     if (d < 256) {
