@@ -30,11 +30,14 @@ public:
     **/
     Volume(char* filePath, int* vSize, Eigen::Vector3f dimension);
 
-    void resetVolume();
+    /**
+       @brief Loads a new dataset
+     **/
+    void resetVolume(char* filePath, int* vSize, Eigen::Vector3f dimension);
 
     /**
-       @brief Configures the compute shader, calculates the gradient based on the dataset,
-              set result as the new texture
+       @brief Configures the compute shader, calculates the gradient based on the
+        dataset, sets result as the new texture
      **/
     void calculateGradient();
 

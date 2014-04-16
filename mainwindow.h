@@ -29,8 +29,14 @@ private slots:
 
     void on_reloadShader_clicked();
 
+    void on_openVolume_clicked();
+
+    void on_loadVolume_clicked();
+
 private:
     Ui::MainWindow *ui;
+
+    QString fileName;
 };
 
 #endif // MAINWINDOW_H

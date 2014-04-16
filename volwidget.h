@@ -33,6 +33,7 @@ public:
      */
     void initialize();
 
+    void resetVolume(char *filePath, int *vSize, Eigen::Vector3f dimension);
 
     /**
      * @brief Repaints screen buffer.

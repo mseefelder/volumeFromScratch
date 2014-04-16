@@ -81,6 +81,50 @@ Volume::Volume(char* filePath, int* vSize, Eigen::Vector3f dimension){
     loadVolume();
 }
 
+void Volume::resetVolume(char *filePath, int *vSize, Eigen::Vector3f dimension){
+
+    delete mainTexture;
+    delete mesh;
+    delete [] volResolution;
+
+    int voxelArraySize = vSize[0]*vSize[1]*vSize[2]*4;
+    volResolution = vSize;
+    voxelArray = new GLubyte[voxelArraySize];
+
+    ///Reading the texture file and sorting it in voxelArray
+    ifstream file (filePath, ios::in|ios::binary);
+
+    char buff[128];
+    int i =0;
+
+    if(file.is_open())
+    {
+        cout << "3D texture file opened:"<<endl;
+        while (!file.eof())
+        {
+            file.read(buff, 1);
+            voxelArray[i+3] = (unsigned char)buff[0];
+            voxelArray[i+2] = (unsigned char)0;
+            voxelArray[i+1] = (unsigned char)0;
+            voxelArray[i] = (unsigned char)0;
+            i+=4;
+        }
+        file.close();
+    }
+    else cout << "Unable to open file!" << endl;
+
+    ///Initializing the mesh
+    mesh = new Mesh();
+    cout << "Mesh created." << endl;
+
+    realDimension = dimension;
+
+    ///Loading the Volume
+    cout << "Entering loadVolume()" << endl;
+    loadVolume();
+}
+
+
 void Volume::loadVolume(){
     cout << "Loading volume..."<<endl;
     cout << volResolution[0] << " " << volResolution[1] << " " << volResolution[2] << endl;
@@ -100,7 +144,8 @@ void Volume::loadVolume(){
 
     cout<<"Texture successfully created!"<<endl;
 
-    delete voxelArray;
+    delete [] voxelArray;
+    voxelArray = 0;
 
     calculateGradient();
     errorCheckFunc(__FILE__, __LINE__);
@@ -181,6 +226,7 @@ void Volume::calculateGradient(){
     glBindImageTexture(0, 0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
     mainTexture->unbind();
     scratchTexture->unbind();
+    delete scratchTexture;
     errorCheckFunc(__FILE__, __LINE__);
 }
 

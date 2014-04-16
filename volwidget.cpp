@@ -308,6 +308,29 @@ void volWidget::keyPressEvent(QKeyEvent *keyevent){
     if (keyevent->key() == Qt::Key_Control){
         tBallIndex = 1;
     }
+    ///
+    if (keyevent->key() == Qt::Key_F2){
+        volume->unbindTexture();
+
+        int* size = new int[3];
+        size[0] = 256; size[1] = 256; size[2] = 128;
+        Eigen::Vector3f  dimension;
+        dimension << 256.0, 256.0, 128.0;
+        volume->resetVolume("datasets/engine_256x256x128_1x1x1.raw",size, dimension);
+        delete [] size;
+
+        texIndex = volume->bindTexture();
+
+        ///The maximum parallellepiped diagonal and volume container dimensions
+        volDiagonal = volume->getDiagonal();
+        volDimensions = volume->getDimensions();
+        volResolution = volume->getTextureResolution();
+
+        ///Set number of steps and calculate step size:
+        Eigen::Vector3f vRes = volume->getTextureResolution();
+        numberOfSteps = max(max(vRes[0], vRes[1]), vRes[2]);
+        stepSize = volDiagonal/numberOfSteps;
+    }
 }
 
 void volWidget::keyReleaseEvent(QKeyEvent *keyevent){
@@ -386,4 +409,22 @@ void volWidget::resetTransferFunction(int a, int b, int c, int d){
 
     errorCheckFunc(__FILE__, __LINE__);
 
+}
+
+void volWidget::resetVolume(char *filePath, int *vSize, Eigen::Vector3f dimension){
+    volume->unbindTexture();
+
+    volume->resetVolume(filePath, vSize, dimension);
+
+    texIndex = volume->bindTexture();
+
+    ///The maximum parallellepiped diagonal and volume container dimensions
+    volDiagonal = volume->getDiagonal();
+    volDimensions = volume->getDimensions();
+    volResolution = volume->getTextureResolution();
+
+    ///Set number of steps and calculate step size:
+    Eigen::Vector3f vRes = volume->getTextureResolution();
+    numberOfSteps = max(max(vRes[0], vRes[1]), vRes[2]);
+    stepSize = volDiagonal/numberOfSteps;
 }

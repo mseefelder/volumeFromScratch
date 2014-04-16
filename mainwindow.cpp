@@ -54,3 +54,32 @@ void MainWindow::on_reloadShader_clicked()
 {
     ui->widget->reloadShader();
 }
+
+void MainWindow::on_openVolume_clicked()
+{
+    fileName = QFileDialog::getOpenFileName(this, "Open Volume", getenv( "HOME" ), "RAW File (*.raw)");
+    if( !fileName.endsWith( ".raw" ))
+    {
+    fileName.append( ".raw" );
+    }
+}
+
+void MainWindow::on_loadVolume_clicked()
+{
+    int * size = new int[3];
+    size[0] = ui->xRes->value(); size[1] = ui->yRes->value(); size[2] = ui->zRes->value();
+    Eigen::Vector3f dimensions;
+    float x, y, z;
+    x = ui->xRes->value()*ui->xSpace->value();
+    y = ui->yRes->value()*ui->ySpace->value();
+    z = ui->zRes->value()*ui->zSpace->value();
+    dimensions << x, y, z;
+    dimensions.normalize();
+
+    QByteArray ba = fileName.toLocal8Bit();
+    const char *filename = ba.data();
+
+    ui->widget->resetVolume(filename, size, dimensions);
+
+    delete [] size;
+}
