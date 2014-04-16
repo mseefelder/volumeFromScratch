@@ -46,21 +46,26 @@ void volWidget::initialize() {
 //    volume = new Volume("datasets/skull256x1.raw",size, dimension);
 
 
-//    int* size = new int[3];
-//    size[0] = 301; size[1] = 324; size[2] = 56;
-//    Eigen::Vector3f  dimension;
-//    dimension << 1.0, 1.0, 1.4;
-//    volume = new Volume("datasets/lobster301x324x56x1x1x1_4.raw",size, dimension);
+    int* size = new int[3];
+    size[0] = 301; size[1] = 324; size[2] = 56;
+    //size[0] = 324; size[1] = 301; size[2] = 56;
+    //size[0] = 324; size[1] = 56; size[2] = 301;
+    //size[0] = 56; size[1] = 324; size[2] = 301;
+    //size[0] = 56; size[1] = 301; size[2] = 324;
+    Eigen::Vector3f  dimension;
+    dimension << 301.0, 324.0, 1.4*56.0;
+    dimension.normalize();
+    volume = new Volume("datasets/lobster301x324x56x1x1x1_4.raw",size, dimension);
 
 //    int* size = new int[3];
-//   size[0] = 150; size[1] = 150; size[2] = 276;
-//   Eigen::Vector3f  dimension;
-//    dimension << 1.5, 1.5, 2.76;
-//    volume = new Volume("datasets/mouse150x150x276_16u.raw",size, dimension); //16bits unsigned
+//    size[0] = 256; size[1] = 256; size[2] = 128;
+//    Eigen::Vector3f  dimension;
+//    dimension << 256.0, 256.0, 128.0;
+//    volume = new Volume("datasets/engine_256x256x128_1x1x1.raw",size, dimension); //16bits unsigned
 
 
     cout << "volWidget initialize"<<endl;
-    volume = new Volume;
+    //volume = new Volume;
     //volume = new Volume(true);
     cout << "Volume created" << endl;
 
@@ -112,7 +117,8 @@ void volWidget::initialize() {
     //cameraTrackball->loadShader();
 
     ///Perspective configuration. Not used yet, because I'm doing it ortogrphically.
-    Eigen::Matrix4f projectionMatrix = cameraTrackball->createPerspectiveMatrix(60.0 , (float)currentWidth/(float)currentHeight, 1.0f , 100.0f );
+    Eigen::Matrix4f projectionMatrix = cameraTrackball->createPerspectiveMatrix(60.0 ,
+                                       (float)currentWidth/(float)currentHeight, 1.0f , 100.0f );
     cameraTrackball->setProjectionMatrix(projectionMatrix);
 
     ///The unit vectors:
@@ -129,7 +135,7 @@ void volWidget::initialize() {
 
     ///Adjust the viewport size
     currentWidth = this->width();
-    currentHeight = this->width(); //this->height();
+    currentHeight = this->height();
     glViewport(0, 0, currentWidth, currentHeight);
 
     errorCheckFunc(__FILE__, __LINE__);
@@ -139,7 +145,7 @@ void volWidget::initialize() {
 
 void volWidget::initializeTransferFunction(){
 
-    float values[256*4];
+    float* values = new float[256*4];
 
     ///Make the Zeroes transparent
     values[0] = 0.0;
@@ -147,7 +153,7 @@ void volWidget::initializeTransferFunction(){
     values[2] = 0.0;
     values[3] = 0.0;
 
-    for(int i = 1; i<256; i++) { //*4 because of 256 RGBA values
+    for(int i = 1; i<256; i++) {
         values[i*4] = 1.0;
         values[i*4+1] = 0.75;
         values[i*4+2] = 0.0;
@@ -160,7 +166,8 @@ void volWidget::initializeTransferFunction(){
     transferFunction->setTexParameters(GL_CLAMP, GL_CLAMP, GL_CLAMP, GL_LINEAR, GL_LINEAR);
     cout<<"TF successfully created!"<<endl;
 
-    //delete values;
+    delete [] values;
+    values = 0;
 
     errorCheckFunc(__FILE__, __LINE__);
 }
@@ -175,7 +182,8 @@ void volWidget::initializeJitteringTexture(){
     JTuid = jitteringTexture->create(GL_TEXTURE_2D, GL_R8, size, size, GL_RED, GL_UNSIGNED_BYTE, values, 0);
     jitteringTexture->setTexParameters(GL_REPEAT, GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST);
 
-    delete values;
+    delete [] values;
+    values = 0;
 }
 
 void volWidget::paintGL(void) {
@@ -232,19 +240,19 @@ void volWidget::draw(void)
 
 void volWidget::mousePressEvent(QMouseEvent *event){
     Eigen::Vector2f screenPos;
-    screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0, (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
+    screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0,
+                 (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
     trackballs[tBallIndex]->setInitialRotationPosition(screenPos);
     trackballs[tBallIndex]->beginRotation();
-    //cout<<"rotation began"<<endl;
 }
 
 void volWidget::mouseReleaseEvent(QMouseEvent *event){
     Eigen::Vector2f screenPos;
 
-    screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0, (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
+    screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0,
+                 (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
     if(trackballs[tBallIndex]->isRotating()) {
         trackballs[tBallIndex]->endRotation();
-        //cout<<"rotation ended"<<endl;
         trackballs[tBallIndex]->setInitialRotationPosition(screenPos);
 
         if (tBallIndex == 1)
@@ -258,8 +266,8 @@ void volWidget::mouseMoveEvent(QMouseEvent *event){
 
     Eigen::Vector2f screenPos;
 
-    screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0, (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
-    //setLayer(screenPos[0]);
+    screenPos << ((event->pos().x()/(float)this->width())*2.0)-1.0,
+                 (2.0*(((float)this->height()-(event->pos().y()))/(float)this->height()))-1.0;
 
     if (trackballs[tBallIndex]->isRotating()){
         trackballs[tBallIndex]->setFinalRotationPosition(screenPos);
@@ -316,7 +324,7 @@ void volWidget::resetTransferFunction(int a, int b, int c, int d){
 
     ///To understand what's happenning check "initializeTransferFunction()"
 
-    float values[256*4];
+    float * values = new float[256*4];
 
     values[0] = 0.0;
     values[1] = 0.0;
@@ -368,20 +376,14 @@ void volWidget::resetTransferFunction(int a, int b, int c, int d){
     delete transferFunction;
 
     transferFunction = new Texture();
-    cout << "TF resetting" << endl;
     errorCheckFunc(__FILE__, __LINE__);
     TFuid = transferFunction->create(GL_TEXTURE_1D, GL_RGBA32F, 256, 256, GL_RGBA, GL_FLOAT, values, 256);
     transferFunction->setTexParameters(GL_CLAMP, GL_CLAMP, GL_CLAMP, GL_LINEAR, GL_LINEAR);
-    cout<<"TF successfully reset!"<<endl;
     TFid = transferFunction->bind();
+
+    delete [] values;
+    values = 0;
 
     errorCheckFunc(__FILE__, __LINE__);
 
 }
-
-/*
-void volWidget::setLayer(float layer){
-    curLayer = layer;
-}
-
-*/

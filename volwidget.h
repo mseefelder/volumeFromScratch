@@ -22,6 +22,9 @@ class volWidget : public QGLWidget
 public:
     explicit volWidget(QWidget *parent);
 
+    /**
+     * @brief Initializes the OpenGL context
+     */
     virtual void initializeGL();
 
     /**
@@ -32,11 +35,9 @@ public:
 
 
     /**
-     * Repaints screen buffer.
+     * @brief Repaints screen buffer.
      **/
     virtual void paintGL();
-
-    //void setLayer(float layer);
 
     /**
      * @brief Initializes the transfer function
@@ -73,8 +74,6 @@ public:
      */
     void resetTransferFunction(int a, int b, int c, int d);
 
-    //void calculateGradient();
-
     void reloadShader();
 
 signals:
@@ -82,47 +81,48 @@ signals:
 public slots:
 
 private:
-    //The volume we're working with
+    ///The volume we're working with and it's Texture ID
     Volume* volume;
     GLint texIndex;
 
-    //Transfer Function and Jittering Texture
+    ///Transfer Function and Jittering Texture
     Texture* transferFunction;
     Texture* jitteringTexture;
 
-    //Index of transfer Function
+    ///Transfer Function and Jittering Texture indices
     GLuint TFuid;
     GLint TFid;
     GLuint JTuid;
     GLint JTid;
 
-    //The unit vectors
+    ///The unit vectors
     Eigen::Vector4f uX, uY, uZ;
 
-    //The volume container diagonal size and dimensions
+    ///About the volume container:
+    ///The diagonal's size
     float volDiagonal;
+    ///The dimensions in world space
     Eigen::Vector3f volDimensions;
+    ///The texture's resolution
     Eigen::Vector3f volResolution;
-    int rootOfDepth;
-    GLubyte* gradArray;
 
-    //Number of steps and step size for rendering
+    ///Number of steps and step size for rendering
     int numberOfSteps;
     float stepSize;
 
     ///Shader
     Shader* shader;
-    Shader* gradShader;
 
-    ///Testing Mesh
+    ///Rendering plane
     Mesh* mesh;
 
     ///Trackball Object for the camera position.
     Trackball* cameraTrackball;
-    ///Trackball object for lights position.
+    ///Trackball object for light position.
     Trackball* lightTrackball;
     ///Contains both trackballs
     Trackball** trackballs;
+    ///Index of the currently active trackball
     int tBallIndex;
 
     ///Current Viewport Width measured in pixels.
@@ -137,20 +137,22 @@ private:
     ///Current Viewport Position in Y axis in pixels.
     int currentPosY;
 
-    ///Render plane center. Has to be updated everytime the camera moves
+    ///Rendering plane's center. Has to be updated everytime the camera moves
     Eigen::Vector4f rendPlaneCenter;
 
-    //FPS counting:
+    ///FPS counting:
     QTime *time;
     int fps;
 
+    /**
+     * @brief Calculates the Rendering plane's center
+     */
     void updateRendPlane();
 
+    /**
+     * @brief The rendering
+     */
     void draw(void);
-
-    //int ins;
-
-    float curLayer;
 
 
 protected:

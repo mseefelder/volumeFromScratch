@@ -30,27 +30,13 @@ public:
     **/
     Volume(char* filePath, int* vSize, Eigen::Vector3f dimension);
 
-    Volume(bool sphere);
-
-    ///NEWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-    /*
-       @brief Receives a 8byte unsigned byte array and sets it as the gradient of the volume data
-       @param unsigned char array
-
-    void setGradient(GLubyte* gradArray, int dimensions);
+    void resetVolume();
 
     /**
-       @brief Resets the 3d texture with the latest voxelArray update
-     *
-    void resetTexture();
-*/
-
-    /**
-       @brief Configures the compute shader, calculates the gradient based on the dataset, set result as the new texture
+       @brief Configures the compute shader, calculates the gradient based on the dataset,
+              set result as the new texture
      **/
     void calculateGradient();
-
-    ///-------------------------------------------------
 
     /**
       @brief Creates the volume container (parallelepiped) and the GL_TEXTURE_3D
@@ -62,6 +48,10 @@ public:
       @return Index to wich texture was binded
     **/
     int bindTexture();
+
+    /**
+      @brief Calls the texture's unbind() function.
+    **/
     void unbindTexture();
 
     /**
@@ -69,7 +59,7 @@ public:
     **/
     GLuint getTexture3D() {
         //return Id;
-        return scratchTexture->texID();
+        return mainTexture->texID();
     }
 
     /**
@@ -86,7 +76,7 @@ public:
       @brief Returns number of layers of the 3D texture
     **/
     int getTextureDepth() {
-        return volSize[2];
+        return volResolution[2];
     }
 
     /**
@@ -94,11 +84,9 @@ public:
     **/
     Eigen::Vector3f getTextureResolution() {
         Eigen::Vector3f dimensions;
-        dimensions << volSize[0], volSize[1], volSize[2];
+        dimensions << volResolution[0], volResolution[1], volResolution[2];
         return dimensions;
     }
-
-    //Volume(string fileName){}
 
     virtual ~Volume() {}
 
@@ -107,21 +95,20 @@ private:
     GLubyte* voxelArray;
 
     ///Vector with x,y,z resolution of the 3D texture:
-    int* volSize;
+    int* volResolution;
 
     ///The mesh:
     Mesh* mesh;
 
-    ///Shader:
+    ///Shaders:
     Shader* gradShader;
     Shader* smoothGrad;
-    Shader* sphereShader;
+
+    ///The scratch texture
+    Texture* scratchTexture;
 
     ///The main texture3D:
-    Texture* texture;
-
-    ///The texture3D+gradient
-    Texture* scratchTexture;
+    Texture* mainTexture;
 
     ///Dimension of the volume in world space
     Eigen::Vector3f realDimension;

@@ -114,7 +114,7 @@ void main(void)
         //currentPos = currentPos + 5*uZ.xyz;
     }
     
-
+/*
     float limit = 0.8;
 
     if (acGrad.a < limit){
@@ -125,7 +125,7 @@ void main(void)
         float comp = acGrad.y; //GRAD TESTING
         out_Color = vec4(comp, comp, comp, 1.0); //GRAD TESTING 
     }
-
+*/
     
     acColor.xyz = normalize(acColor.xyz);
     acColor = 0.1 * vec4(1.0) * max(dot(lightDirection, acGrad.xyz), 0.0)
