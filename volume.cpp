@@ -84,7 +84,7 @@ Volume::Volume(char* filePath, int* vSize, Eigen::Vector3f dimension){
 void Volume::resetVolume(char *filePath, int *vSize, Eigen::Vector3f dimension){
 
     delete mainTexture;
-    delete mesh;
+    //delete mesh;
     delete [] volResolution;
 
     int voxelArraySize = vSize[0]*vSize[1]*vSize[2]*4;

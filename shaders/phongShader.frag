@@ -29,8 +29,10 @@ void main(void)
 {   
     int substeps = 2;
     float pi = 2.1415;
+    float shininess = 100.0;
     vec4 acColor = vec4(0.0, 0.0, 0.0, 0.0);
     vec4 acGrad = vec4(0.0,0.0,0.0,0.0);
+    vec4 acEye = vec4(0.0);
     vec4 curColor = vec4(0.0);
 
     vec3 fPos = vec3(gl_FragCoord.x/screenWidth, gl_FragCoord.y/screenHeight, 0.0);
@@ -45,7 +47,7 @@ void main(void)
     eX = ((fPos.x*2.0)-1.0)*(diagonal/2.0);
     eY = ((fPos.y*2.0)-1.0)*(diagonal/2.0);
     wFPos = (rendPlaneCenter+eX*uX+eY*uY).xyz;
-    currentPos = wFPos; // - normalize(uZ.xyz)*(texelFetch(jitteringTexture, ivec2(gl_FragCoord.xy), 0).x+0.00001);
+    currentPos = wFPos;// + normalize(uZ.xyz)*(texelFetch(jitteringTexture, ivec2(gl_FragCoord.xy), 0).x+0.00001)*0.5;
 
     //vec3 lightDirection = vec3(0.0,1.0,0.0);
     vec3 lightDirection = lightViewMatrix * vec3(0.0, 0.0, 1.0);
@@ -53,7 +55,7 @@ void main(void)
     
     float diffuseAcc;
 
-    for(int j; j<(numberOfSteps*substeps); j++){
+    for(int j; j<((numberOfSteps*substeps)+10); j++){
         //vec3 coord = (currentPos.xyz+volDimensions)*0.5/(volDimensions).xyz;
         vec3 coord = (currentPos.xyz/(volDimensions).xyz)+vec3(0.5);
         if(coord.x<1.0 && coord.x>0.0 && coord.y<1.0 && coord.y>0.0 && coord.z<1.0 && coord.z>0.0){
@@ -92,15 +94,31 @@ void main(void)
             //acGrad += abs(voxelValue.a*voxelValue); //GRAD TESTING - method #1
 
             //GRAD TESTING - method #2
-            /**/
+            /*
             if(acGrad.a < 1.0){
                 if(curColor.a != 0){
-                    acGrad += (1.0 - alpha)*(voxelValue);
-                    //acGrad += curColor.a*voxelValue;    
+                    acGrad.xyz += (1.0 - alpha)*(voxelValue.xyz);
+                    acGrad.a +=  (1.0 - alpha) * curColor.a;   
                 }            
             }
             /**/
 
+            //GRAD TESTING - method #2
+            /**/
+            if(acGrad.a < 1.0){
+                if(curColor.a != 0){
+                    acGrad += (1.0 - alpha)*(voxelValue);   
+                }            
+            }
+            /**/
+
+            if(acEye.a < 1.0){
+                if(curColor.a != 0){
+                    acEye.xyz += (1.0 - alpha)*(-normalize(coord));
+                    acEye.a +=  (1.0 - alpha) * curColor.a;   
+                }            
+            }
+            
             //diffuseAcc = diffuseAcc + max(dot(lightDirection, voxelValue.xyz),0.0);
 
             //acColor.rgb = acColor.xyz * max(dot(lightDirection, voxelValue.xyz), 0.0); //MAXIMUM ENCOUTERED BY THIS RAY
@@ -127,11 +145,14 @@ void main(void)
     }
 */
     
+    vec3 lightReflection = reflect(-lightDirection, acGrad.xyz);
+
     acColor.xyz = normalize(acColor.xyz);
     acColor = 0.1 * vec4(1.0) * max(dot(lightDirection, acGrad.xyz), 0.0)
             + 0.7 * acColor * max(dot(lightDirection, normalize(acGrad.xyz)), 0.0)
-            + 0.2 * acColor 
-            + (0.0) * normalize(acGrad) 
+            + 0.0 * max(pow(dot(lightReflection,acEye.xyz),shininess),0.0)
+            + 0.15 * acColor 
+            + (0.05) * normalize(acGrad) 
             + 0.0 * vec4(normalize(lightDirection), 0.0) ;//*vec4(1.0);
 
     acColor.a = 1.0;
