@@ -32,7 +32,12 @@ public:
 
     /**
        @brief Loads a new dataset
-     **/
+     * @param Path to the volume dataset
+     * @param Volume resolution
+     * @param Volume size in world coordinates. Calculate it using the spacing
+     *between layers and the volume resolution and pass as parameter to this
+     *function.
+     */
     void resetVolume(char* filePath, int* vSize, Eigen::Vector3f dimension);
 
     /**
