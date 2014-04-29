@@ -53,6 +53,8 @@ public:
      */
     void initializeTransferFunction();
 
+    void load2DTransferFunction(string filePath, int* wh);
+
     /**
      * @brief Initializes the transfer function
      */

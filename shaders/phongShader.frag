@@ -17,7 +17,7 @@ uniform int numberOfSteps;
 uniform float stepSize;
 
 uniform sampler3D volumeTexture;
-uniform sampler1D transferFunction;
+uniform sampler2D transferFunction;
 uniform sampler2D jitteringTexture;
 uniform int textureDepth;
 
@@ -62,7 +62,9 @@ void main(void)
             vec4 voxelValue;
             voxelValue = texture(volumeTexture, coord);
             //voxelValue.xyz = (voxelValue.xyz*2.0) - vec3(1.0);
-            curColor = texture(transferFunction, voxelValue.a);
+            
+            //curColor = texture(transferFunction, voxelValue.a);
+            curColor = texture(transferFunction, vec2(voxelValue.a, length(voxelValue.xyz)));
 
             //Compositing: Methodo 1
             alpha = acColor.a;
@@ -148,15 +150,17 @@ void main(void)
     vec3 lightReflection = reflect(-lightDirection, acGrad.xyz);
 
     acColor.xyz = normalize(acColor.xyz);
-    acColor = 0.1 * vec4(1.0) * max(dot(lightDirection, acGrad.xyz), 0.0)
-            + 0.7 * acColor * max(dot(lightDirection, normalize(acGrad.xyz)), 0.0)
+    acColor = 0.0 * vec4(1.0) * max(dot(lightDirection, acGrad.xyz), 0.0)
+            + 0.0 * acColor * max(dot(lightDirection, normalize(acGrad.xyz)), 0.0)
             + 0.0 * max(pow(dot(lightReflection,acEye.xyz),shininess),0.0)
-            + 0.15 * acColor 
-            + (0.05) * normalize(acGrad) 
+            + 1 * acColor 
+            + (0.00) * normalize(acGrad) 
             + 0.0 * vec4(normalize(lightDirection), 0.0) ;//*vec4(1.0);
 
     acColor.a = 1.0;
     out_Color = acColor ;
+
+    //out_Color = texture(transferFunction, vec2(gl_FragCoord.x/screenWidth, gl_FragCoord.y/screenHeight));
 
 }
 

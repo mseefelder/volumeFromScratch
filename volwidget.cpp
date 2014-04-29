@@ -86,8 +86,12 @@ void volWidget::initialize() {
     stepSize = volDiagonal/numberOfSteps;
 
     ///Initialize transfer function and the jittering texture:
-    initializeTransferFunction();
+    //initializeTransferFunction();
     initializeJitteringTexture();
+    string tfLocation = "tf/transfer.raw";
+    int* tfRes = new int[2];
+    tfRes[0] = 100; tfRes[1] = 100;
+    load2DTransferFunction(tfLocation, tfRes);
 
     ///Texture binding
     texIndex = volume->bindTexture();
@@ -143,6 +147,48 @@ void volWidget::initialize() {
     cout << "Initialized!" << endl;
 }
 
+void volWidget::load2DTransferFunction(string filePath, int* wh){
+    int textureSize = wh[0]*wh[1]*4;
+    GLubyte* tempTransfer = new GLubyte[textureSize];
+/*
+    const char* c = filePath.c_str();
+    ifstream file (c, ios::in|ios::binary);
+
+    char buff[128];
+    int i = 0;
+
+    if(file.is_open())
+    {
+        cout << "2D texture file opened:"<<endl;
+        while (i<textureSize)
+        {
+            file.read(buff, 1);
+            tempTransfer[i] = (unsigned char)buff[0];
+            cout<<tempTransfer[i]<<", ";
+            i+=1;
+        }
+        file.close();
+    }
+    else cout << "Unable to open 2D Transfer Function file!" << endl;
+*/
+
+    for (int i = 0; i < textureSize; i+=4){
+        tempTransfer[i] = (unsigned char)max(((i-2000)/400),0)&0xFF;//0x00;
+        tempTransfer[i+1] = (unsigned char)max(((i-8000)/400),0)&0xFF;//0xFa;
+        tempTransfer[i+2] = (unsigned char)max(((i-36000)/400),0)&0xFF;//0x00;
+        tempTransfer[i+3] = (unsigned char)max(((i-8000)/400),0)&0xFF;//0xFF;
+    }
+
+    transferFunction = new Texture();
+    transferFunction->create(GL_TEXTURE_2D, GL_RGBA8, wh[0], wh[1], GL_RGBA, GL_UNSIGNED_BYTE, tempTransfer);
+    transferFunction->setTexParameters(GL_CLAMP,GL_CLAMP,GL_CLAMP,GL_LINEAR,GL_LINEAR);
+
+    delete [] tempTransfer;
+    tempTransfer = 0;
+
+    errorCheckFunc(__FILE__, __LINE__);
+}
+
 void volWidget::initializeTransferFunction(){
 
     float* values = new float[256*4];
@@ -170,6 +216,74 @@ void volWidget::initializeTransferFunction(){
     values = 0;
 
     errorCheckFunc(__FILE__, __LINE__);
+}
+
+void volWidget::resetTransferFunction(int a, int b, int c, int d){
+
+    ///To understand what's happenning check "initializeTransferFunction()"
+
+    float * values = new float[256*4];
+
+    values[0] = 0.0;
+    values[1] = 0.0;
+    values[2] = 0.0;
+    values[3] = 0.0;
+
+    if (a > 0){
+        for(int i = 0; i < a; i++){
+            values[i*4] = 0.0;
+            values[i*4+1] = 0.0;
+            values[i*4+2] = 0.0;
+            values[i*4+3] = 0.0;
+        }
+    }
+
+    float dividerAB = 1.0*(b-a);
+    for(int i = a; i<b; i++) {
+        values[i*4] = 1.0;
+        values[i*4+1] = 1.0*((i-a)/dividerAB);
+        values[i*4+2] = 1.0*((i-a)/dividerAB);
+        values[i*4+3] = 0.01*((i-a)/dividerAB);
+    }
+
+    for(int i = b; i < c; i++){
+        values[i*4] = 1.0;
+        values[i*4+1] = 1.0;
+        values[i*4+2] = 1.0;
+        values[i*4+3] = 0.05*10.0;
+    }
+
+    float dividerCD = 1.0*(d-c);
+    for(int i = c; i < d; i++){
+        values[i*4] = 1.0*((i-c)/dividerCD);
+        values[i*4+1] = 1.0;
+        values[i*4+2] = 1.0;
+        values[i*4+3] = 0.01*((i-c)/dividerCD)*5.0;
+    }
+
+    if (d < 256) {
+        for(int i = d; i < 256; i++){
+            values[i*4] = 0.0;
+            values[i*4+1] = 0.0;
+            values[i*4+2] = 0.0;
+            values[i*4+3] = 0.0;
+        }
+    }
+
+    transferFunction->unbind();
+    delete transferFunction;
+
+    transferFunction = new Texture();
+    errorCheckFunc(__FILE__, __LINE__);
+    TFuid = transferFunction->create(GL_TEXTURE_1D, GL_RGBA32F, 256, 256, GL_RGBA, GL_FLOAT, values, 256);
+    transferFunction->setTexParameters(GL_CLAMP, GL_CLAMP, GL_CLAMP, GL_LINEAR, GL_LINEAR);
+    TFid = transferFunction->bind();
+
+    delete [] values;
+    values = 0;
+
+    errorCheckFunc(__FILE__, __LINE__);
+
 }
 
 void volWidget::initializeJitteringTexture(){
@@ -341,74 +455,6 @@ void volWidget::keyReleaseEvent(QKeyEvent *keyevent){
 
 void volWidget::reloadShader(){
     shader->reloadShaders();
-}
-
-void volWidget::resetTransferFunction(int a, int b, int c, int d){
-
-    ///To understand what's happenning check "initializeTransferFunction()"
-
-    float * values = new float[256*4];
-
-    values[0] = 0.0;
-    values[1] = 0.0;
-    values[2] = 0.0;
-    values[3] = 0.0;
-
-    if (a > 0){
-        for(int i = 0; i < a; i++){
-            values[i*4] = 0.0;
-            values[i*4+1] = 0.0;
-            values[i*4+2] = 0.0;
-            values[i*4+3] = 0.0;
-        }
-    }
-
-    float dividerAB = 1.0*(b-a);
-    for(int i = a; i<b; i++) {
-        values[i*4] = 1.0;
-        values[i*4+1] = 1.0*((i-a)/dividerAB);
-        values[i*4+2] = 1.0*((i-a)/dividerAB);
-        values[i*4+3] = 0.01*((i-a)/dividerAB);
-    }
-
-    for(int i = b; i < c; i++){
-        values[i*4] = 1.0;
-        values[i*4+1] = 1.0;
-        values[i*4+2] = 1.0;
-        values[i*4+3] = 0.05*10.0;
-    }
-
-    float dividerCD = 1.0*(d-c);
-    for(int i = c; i < d; i++){
-        values[i*4] = 1.0*((i-c)/dividerCD);
-        values[i*4+1] = 1.0;
-        values[i*4+2] = 1.0;
-        values[i*4+3] = 0.01*((i-c)/dividerCD)*5.0;
-    }
-
-    if (d < 256) {
-        for(int i = d; i < 256; i++){
-            values[i*4] = 0.0;
-            values[i*4+1] = 0.0;
-            values[i*4+2] = 0.0;
-            values[i*4+3] = 0.0;
-        }
-    }
-
-    transferFunction->unbind();
-    delete transferFunction;
-
-    transferFunction = new Texture();
-    errorCheckFunc(__FILE__, __LINE__);
-    TFuid = transferFunction->create(GL_TEXTURE_1D, GL_RGBA32F, 256, 256, GL_RGBA, GL_FLOAT, values, 256);
-    transferFunction->setTexParameters(GL_CLAMP, GL_CLAMP, GL_CLAMP, GL_LINEAR, GL_LINEAR);
-    TFid = transferFunction->bind();
-
-    delete [] values;
-    values = 0;
-
-    errorCheckFunc(__FILE__, __LINE__);
-
 }
 
 void volWidget::resetVolume(char *filePath, int *vSize, Eigen::Vector3f dimension){

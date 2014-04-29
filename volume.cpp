@@ -43,13 +43,16 @@ Volume::Volume(){
 }
 
 Volume::Volume(char* filePath, int* vSize, Eigen::Vector3f dimension){
+//Volume::Volume(string filePath, int* vSize, Eigen::Vector3f dimension){
     cout << "Start" << endl;
     int voxelArraySize = vSize[0]*vSize[1]*vSize[2]*4;
     volResolution = vSize;
     voxelArray = new GLubyte[voxelArraySize];
 
     ///Reading the texture file and sorting it in voxelArray
+    //const char* c = filePath.c_str();
     ifstream file (filePath, ios::in|ios::binary);
+    //ifstream file (c, ios::in|ios::binary);
 
     char buff[128];
     int i =0;
