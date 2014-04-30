@@ -187,22 +187,28 @@ void volWidget::load2DTransferFunction(string filePath, int* wh){
         neutZone = min(neutZone, (float)1.0);
         neutZone = neutZone;
 
-        rad = sqrt(pow((fx-1.0),2) + pow((fy-1.0),2));
-        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
-        rad = min(rad, (float)1.0);
-        tempTransfer[i+2] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
-
-        rad = sqrt(pow((fx-1.0),2) + pow((fy-0.5),2));
-        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
-        rad = min(rad, (float)1.0);
-        tempTransfer[i+1] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
-
-        rad = sqrt(pow((fx-1.0),2) + pow((fy),2));
+        rad = sin(sqrt(pow((fx-1.0),2) + pow((fy),2)));
         //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
         rad = min(rad, (float)1.0);
         tempTransfer[i] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
 
-        tempTransfer[i+3] = (unsigned char) ((int) (neutZone*max(fx-0.08, 0.0)*0.03*255))&0xFF;
+        rad = cos(sqrt(pow((fx-1.0),2) + pow((fy-0.25),2)));
+        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
+        rad = min(rad, (float)1.0);
+        tempTransfer[i+1] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
+
+        rad = sqrt(pow((fx-1.0),2) + pow((fy-0.5),2));
+        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
+        rad = min(rad, (float)1.0);
+        tempTransfer[i+2] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
+
+
+        rad = sqrt(pow((fx-1.0),2) + pow((fy),2));
+        rad = min(rad, (float)1.0);
+        tempTransfer[i+3] = (unsigned char) (int) ((1.0-rad)*max(((1.0-fx)-0.2),0.0)*0.5*255)&0xFF;
+
+
+        //tempTransfer[i+3] = (unsigned char) ((int) (neutZone*max(fx-0.08, 0.0)*0.03*255))&0xFF; // latest
         //tempTransfer[i+3] = (unsigned char) (int) (min(max(fx-0.25, 0.0)*max((fy)+0.25,0.0), 1.0)*0.5*255)&0xFF;//0xFF;
 
         //rad = sqrt(pow((fx-1.0),2) + pow((fy-1.0),2));

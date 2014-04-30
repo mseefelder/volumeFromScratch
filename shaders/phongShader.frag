@@ -160,7 +160,7 @@ void main(void)
     acColor.a = 1.0;
     out_Color = acColor ;
 
-    //out_Color = texture(transferFunction, vec2(gl_FragCoord.x/screenWidth, gl_FragCoord.y/screenHeight));
+    out_Color = texture(transferFunction, vec2(gl_FragCoord.x/screenWidth, gl_FragCoord.y/screenHeight));
 
 }
 
