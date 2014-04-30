@@ -150,10 +150,10 @@ void main(void)
     vec3 lightReflection = reflect(-lightDirection, acGrad.xyz);
 
     acColor.xyz = normalize(acColor.xyz);
-    acColor = 0.0 * vec4(1.0) * max(dot(lightDirection, acGrad.xyz), 0.0)
-            + 0.0 * acColor * max(dot(lightDirection, normalize(acGrad.xyz)), 0.0)
+    acColor = 0.1 * vec4(1.0) * max(dot(lightDirection, acGrad.xyz), 0.0)
+            + 0.7 * acColor * max(dot(lightDirection, normalize(acGrad.xyz)), 0.0)
             + 0.0 * max(pow(dot(lightReflection,acEye.xyz),shininess),0.0)
-            + 1 * acColor 
+            + 0.2 * acColor 
             + (0.00) * normalize(acGrad) 
             + 0.0 * vec4(normalize(lightDirection), 0.0) ;//*vec4(1.0);
 

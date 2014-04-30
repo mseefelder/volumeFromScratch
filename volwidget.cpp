@@ -45,7 +45,7 @@ void volWidget::initialize() {
 //    dimension << 1.0, 1.0, 1.0;
 //    volume = new Volume("datasets/skull256x1.raw",size, dimension);
 
-
+/*
     int* size = new int[3];
     size[0] = 301; size[1] = 324; size[2] = 56;
     //size[0] = 324; size[1] = 301; size[2] = 56;
@@ -56,7 +56,7 @@ void volWidget::initialize() {
     dimension << 301.0, 324.0, 1.4*56.0;
     dimension.normalize();
     volume = new Volume("datasets/lobster301x324x56x1x1x1_4.raw",size, dimension);
-
+*/
 //    int* size = new int[3];
 //    size[0] = 256; size[1] = 256; size[2] = 128;
 //    Eigen::Vector3f  dimension;
@@ -65,7 +65,7 @@ void volWidget::initialize() {
 
 
     cout << "volWidget initialize"<<endl;
-    //volume = new Volume;
+    volume = new Volume;
     //volume = new Volume(true);
     cout << "Volume created" << endl;
 
@@ -171,12 +171,51 @@ void volWidget::load2DTransferFunction(string filePath, int* wh){
     }
     else cout << "Unable to open 2D Transfer Function file!" << endl;
 */
-
+    int x,y, qI;
+    float fx, fy, rad, neutZone, maxRad;
+    maxRad = sqrt(2.0);
     for (int i = 0; i < textureSize; i+=4){
+        qI = i/4;
+        y = (qI/wh[0]);
+        x = qI-(y*wh[0]);
+        fx = (float) (x/(wh[0]*1.0));
+        fy = (float) (y/(wh[1]*1.0));
+
+        //neutZone = max((0.08*sqrt(pow((fx),2) + pow((fy),2))), 0.0);
+        neutZone = sqrt(pow((fx),2) + pow((fy),2));
+        neutZone = max(neutZone-0.08, 0.0);
+        neutZone = min(neutZone, (float)1.0);
+        neutZone = neutZone;
+
+        rad = sqrt(pow((fx-1.0),2) + pow((fy-1.0),2));
+        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
+        rad = min(rad, (float)1.0);
+        tempTransfer[i+2] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
+
+        rad = sqrt(pow((fx-1.0),2) + pow((fy-0.5),2));
+        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
+        rad = min(rad, (float)1.0);
+        tempTransfer[i+1] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
+
+        rad = sqrt(pow((fx-1.0),2) + pow((fy),2));
+        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
+        rad = min(rad, (float)1.0);
+        tempTransfer[i] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
+
+        tempTransfer[i+3] = (unsigned char) ((int) (neutZone*max(fx-0.08, 0.0)*0.03*255))&0xFF;
+        //tempTransfer[i+3] = (unsigned char) (int) (min(max(fx-0.25, 0.0)*max((fy)+0.25,0.0), 1.0)*0.5*255)&0xFF;//0xFF;
+
+        //rad = sqrt(pow((fx-1.0),2) + pow((fy-1.0),2));
+        //tempTransfer[i+3] = (unsigned char) ((int) (((1.0-rad)*0.05)*255))&0xFF;
+        //tempTransfer[i+3] = (unsigned char)max(((i-8000)/400),0)&0xFF;//0xFF;
+
+        /*
         tempTransfer[i] = (unsigned char)max(((i-2000)/400),0)&0xFF;//0x00;
         tempTransfer[i+1] = (unsigned char)max(((i-8000)/400),0)&0xFF;//0xFa;
         tempTransfer[i+2] = (unsigned char)max(((i-36000)/400),0)&0xFF;//0x00;
         tempTransfer[i+3] = (unsigned char)max(((i-8000)/400),0)&0xFF;//0xFF;
+        */
+
     }
 
     transferFunction = new Texture();
