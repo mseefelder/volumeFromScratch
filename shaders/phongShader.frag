@@ -63,8 +63,8 @@ void main(void)
             voxelValue = texture(volumeTexture, coord);
             //voxelValue.xyz = (voxelValue.xyz*2.0) - vec3(1.0);
             
-            //curColor = texture(transferFunction, voxelValue.a);
-            curColor = texture(transferFunction, vec2(voxelValue.a, length(voxelValue.xyz)));
+            //curColor = texture(transferFunction, voxelValue.a); //1D tf
+            curColor = texture(transferFunction, vec2(voxelValue.a, length(voxelValue.xyz))); //2D tf
 
             //Compositing: Methodo 1
             alpha = acColor.a;
@@ -160,8 +160,8 @@ void main(void)
     acColor.a = 1.0;
     out_Color = acColor ;
 
-    out_Color = texture(transferFunction, vec2(gl_FragCoord.x/screenWidth, gl_FragCoord.y/screenHeight));
-
+    //out_Color = texture(transferFunction, vec2(gl_FragCoord.x/screenWidth, gl_FragCoord.y/screenHeight));
+    //out_Color = vec4(vec3((texture(transferFunction, vec2(gl_FragCoord.x/screenWidth, gl_FragCoord.y/screenHeight))).a), 1.0);
 }
 
     //lightDirection = normalize(vec3(1.0,0.0,0.0));

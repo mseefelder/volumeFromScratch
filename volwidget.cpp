@@ -86,12 +86,12 @@ void volWidget::initialize() {
     stepSize = volDiagonal/numberOfSteps;
 
     ///Initialize transfer function and the jittering texture:
-    //initializeTransferFunction();
+    //initializeTransferFunction(); //tf 1D
     initializeJitteringTexture();
     string tfLocation = "tf/transfer.raw";
     int* tfRes = new int[2];
     tfRes[0] = 100; tfRes[1] = 100;
-    load2DTransferFunction(tfLocation, tfRes);
+    load2DTransferFunction(tfLocation, tfRes); //tf 2D
 
     ///Texture binding
     texIndex = volume->bindTexture();
@@ -203,7 +203,7 @@ void volWidget::load2DTransferFunction(string filePath, int* wh){
         tempTransfer[i+2] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
 
 
-        rad = sqrt(pow((fx-1.0),2) + pow((fy),2));
+        rad = sqrt(pow((fx-1.0),2) + pow((fy-0.5),2));
         rad = min(rad, (float)1.0);
         tempTransfer[i+3] = (unsigned char) (int) ((1.0-rad)*max(((1.0-fx)-0.2),0.0)*0.5*255)&0xFF;
 
@@ -285,7 +285,7 @@ void volWidget::resetTransferFunction(int a, int b, int c, int d){
 
     float dividerAB = 1.0*(b-a);
     for(int i = a; i<b; i++) {
-        values[i*4] = 1.0;
+        values[i*4] = 2.0;
         values[i*4+1] = 1.0*((i-a)/dividerAB);
         values[i*4+2] = 1.0*((i-a)/dividerAB);
         values[i*4+3] = 0.01*((i-a)/dividerAB);

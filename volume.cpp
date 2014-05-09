@@ -117,8 +117,8 @@ void Volume::resetVolume(char *filePath, int *vSize, Eigen::Vector3f dimension){
     else cout << "Unable to open file!" << endl;
 
     ///Initializing the mesh
-    mesh = new Mesh();
-    cout << "Mesh created." << endl;
+    //mesh = new Mesh();
+    //cout << "Mesh created." << endl;
 
     realDimension = dimension;
 
