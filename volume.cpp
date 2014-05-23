@@ -163,6 +163,9 @@ void Volume::unbindTexture(){
 }
 
 void Volume::calculateGradient(){
+    QTime timer;
+    timer.start();
+
     cout<<" Calculating gradient "<<endl;
 
     gradShader = new Shader("shaders/","gradShader",1);
@@ -230,6 +233,9 @@ void Volume::calculateGradient(){
     mainTexture->unbind();
     scratchTexture->unbind();
     delete scratchTexture;
+    glFinish();
+
+    cout<<"Gradient calculation and smoothing:"<<timer.elapsed()<<" ms."<<endl;
     errorCheckFunc(__FILE__, __LINE__);
 }
 

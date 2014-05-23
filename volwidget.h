@@ -14,6 +14,9 @@
 #include <QMouseEvent>
 #include <QDebug>
 #include <QTime>
+#include <QTimer>
+#include <QImage>
+#include <QRgb>
 
 
 class volWidget : public QGLWidget
@@ -84,6 +87,7 @@ public:
      * @brief Resets the transfer function
      */
     void resetTransferFunction(int a, int b, int c, int d);
+    void reset2DTransferFunction(int a, int b, int c, int d);
 
     void reloadShader();
 
@@ -153,7 +157,8 @@ private:
 
     ///FPS counting:
     QTime *time;
-    int fps;
+    float spf;
+    int framecount;
 
     /**
      * @brief Calculates the Rendering plane's center

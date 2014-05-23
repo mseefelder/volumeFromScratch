@@ -12,6 +12,7 @@
 #include "texture.hpp"
 #include "mesh.hpp"
 #include "trackball.hpp"
+#include <QTime>
 
 class Volume
 {

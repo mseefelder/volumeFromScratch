@@ -33,7 +33,7 @@ void MainWindow::on_tf_C_valueChanged(int value)
 
 void MainWindow::on_resetTF_clicked()
 {
-    ui->widget->resetTransferFunction(ui->tf_A->value(),
+    ui->widget->reset2DTransferFunction(ui->tf_A->value(),
                                       ui->tf_B->value(),
                                       ui->tf_C->value(),
                                       ui->tf_D->value());

@@ -39,13 +39,13 @@ void volWidget::initialize() {
 //    dimension << 1.0, 1.0, 1.0;
 //    volume = new Volume("datasets/neghip64x64x64x1.raw",size, dimension);
 
-//    int* size = new int[3];
-//    size[0] = 256; size[1] = 256; size[2] = 256;
-//    Eigen::Vector3f  dimension;
-//    dimension << 1.0, 1.0, 1.0;
-//    volume = new Volume("datasets/skull256x1.raw",size, dimension);
+ //   int* size = new int[3];
+ //   size[0] = 256; size[1] = 256; size[2] = 256;
+ //  Eigen::Vector3f  dimension;
+ //  dimension << 1.0, 1.0, 1.0;
+ //   volume = new Volume("datasets/bonsai256x1.raw",size, dimension);
 
-/*
+/**/
     int* size = new int[3];
     size[0] = 301; size[1] = 324; size[2] = 56;
     //size[0] = 324; size[1] = 301; size[2] = 56;
@@ -56,7 +56,7 @@ void volWidget::initialize() {
     dimension << 301.0, 324.0, 1.4*56.0;
     dimension.normalize();
     volume = new Volume("datasets/lobster301x324x56x1x1x1_4.raw",size, dimension);
-*/
+/**/
 //    int* size = new int[3];
 //    size[0] = 256; size[1] = 256; size[2] = 128;
 //    Eigen::Vector3f  dimension;
@@ -65,7 +65,7 @@ void volWidget::initialize() {
 
 
     cout << "volWidget initialize"<<endl;
-    volume = new Volume;
+    //volume = new Volume;
     //volume = new Volume(true);
     cout << "Volume created" << endl;
 
@@ -135,6 +135,7 @@ void volWidget::initialize() {
 
     ///For fps counting
     time = new QTime();
+    framecount = 0;
     time->start();
 
     ///Adjust the viewport size
@@ -148,90 +149,104 @@ void volWidget::initialize() {
 }
 
 void volWidget::load2DTransferFunction(string filePath, int* wh){
-    int textureSize = wh[0]*wh[1]*4;
-    GLubyte* tempTransfer = new GLubyte[textureSize];
-/*
-    const char* c = filePath.c_str();
-    ifstream file (c, ios::in|ios::binary);
 
-    char buff[128];
-    int i = 0;
+//    int textureSize = wh[0]*wh[1]*4;
+//    GLubyte* tempTransfer = new GLubyte[textureSize];
+///*
+//    const char* c = filePath.c_str();
+//    ifstream file (c, ios::in|ios::binary);
 
-    if(file.is_open())
-    {
-        cout << "2D texture file opened:"<<endl;
-        while (i<textureSize)
-        {
-            file.read(buff, 1);
-            tempTransfer[i] = (unsigned char)buff[0];
-            cout<<tempTransfer[i]<<", ";
-            i+=1;
-        }
-        file.close();
-    }
-    else cout << "Unable to open 2D Transfer Function file!" << endl;
-*/
-    int x,y, qI;
-    float fx, fy, rad, neutZone, maxRad;
-    maxRad = sqrt(2.0);
-    for (int i = 0; i < textureSize; i+=4){
-        qI = i/4;
-        y = (qI/wh[0]);
-        x = qI-(y*wh[0]);
-        fx = (float) (x/(wh[0]*1.0));
-        fy = (float) (y/(wh[1]*1.0));
+//    char buff[128];
+//    int i = 0;
 
-        //neutZone = max((0.08*sqrt(pow((fx),2) + pow((fy),2))), 0.0);
-        neutZone = sqrt(pow((fx),2) + pow((fy),2));
-        neutZone = max(neutZone-0.08, 0.0);
-        neutZone = min(neutZone, (float)1.0);
-        neutZone = neutZone;
+//    if(file.is_open())
+//    {
+//        cout << "2D texture file opened:"<<endl;
+//        while (i<textureSize)
+//        {
+//            file.read(buff, 1);
+//            tempTransfer[i] = (unsigned char)buff[0];
+//            cout<<tempTransfer[i]<<", ";
+//            i+=1;
+//        }
+//        file.close();
+//    }
+//    else cout << "Unable to open 2D Transfer Function file!" << endl;
+//*/
+//    int x,y, qI;
+//    float fx, fy, rad, neutZone, maxRad;
+//    maxRad = sqrt(2.0);
+//    for (int i = 0; i < textureSize; i+=4){
+//        qI = i/4;
+//        y = (qI/wh[0]);
+//        x = qI-(y*wh[0]);
+//        fx = (float) (x/(wh[0]*1.0));
+//        fy = (float) (y/(wh[1]*1.0));
 
-        rad = sin(sqrt(pow((fx-1.0),2) + pow((fy),2)));
-        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
-        rad = min(rad, (float)1.0);
-        tempTransfer[i] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
+//        //neutZone = max((0.08*sqrt(pow((fx),2) + pow((fy),2))), 0.0);
+//        neutZone = sqrt(pow((fx),2) + pow((fy),2));
+//        neutZone = max(neutZone-0.08, 0.0);
+//        neutZone = min(neutZone, (float)1.0);
+//        neutZone = neutZone;
 
-        rad = cos(sqrt(pow((fx-1.0),2) + pow((fy-0.25),2)));
-        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
-        rad = min(rad, (float)1.0);
-        tempTransfer[i+1] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
+//        rad = sin(sqrt(pow((fx-1.0),2) + pow((fy),2)));
+//        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
+//        rad = min(rad, (float)1.0);
+//        tempTransfer[i] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
 
-        rad = sqrt(pow((fx-1.0),2) + pow((fy-0.5),2));
-        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
-        rad = min(rad, (float)1.0);
-        tempTransfer[i+2] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
+//        rad = cos(sqrt(pow((fx-1.0),2) + pow((fy-0.25),2)));
+//        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
+//        rad = min(rad, (float)1.0);
+//        tempTransfer[i+1] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
 
-
-        rad = sqrt(pow((fx-1.0),2) + pow((fy-0.5),2));
-        rad = min(rad, (float)1.0);
-        tempTransfer[i+3] = (unsigned char) (int) ((1.0-rad)*max(((1.0-fx)-0.2),0.0)*0.5*255)&0xFF;
+//        rad = sqrt(pow((fx-1.0),2) + pow((fy-0.5),2));
+//        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
+//        rad = min(rad, (float)1.0);
+//        tempTransfer[i+2] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
 
 
-        //tempTransfer[i+3] = (unsigned char) ((int) (neutZone*max(fx-0.08, 0.0)*0.03*255))&0xFF; // latest
-        //tempTransfer[i+3] = (unsigned char) (int) (min(max(fx-0.25, 0.0)*max((fy)+0.25,0.0), 1.0)*0.5*255)&0xFF;//0xFF;
+//        rad = sqrt(pow((fx-1.0),2) + pow((fy-0.5),2));
+//        rad = min(rad, (float)1.0);
+//        tempTransfer[i+3] = (unsigned char) (int) ((1.0-rad)*max(((1.0-fx)-0.2),0.0)*0.5*255)&0xFF;
 
-        //rad = sqrt(pow((fx-1.0),2) + pow((fy-1.0),2));
-        //tempTransfer[i+3] = (unsigned char) ((int) (((1.0-rad)*0.05)*255))&0xFF;
-        //tempTransfer[i+3] = (unsigned char)max(((i-8000)/400),0)&0xFF;//0xFF;
 
-        /*
-        tempTransfer[i] = (unsigned char)max(((i-2000)/400),0)&0xFF;//0x00;
-        tempTransfer[i+1] = (unsigned char)max(((i-8000)/400),0)&0xFF;//0xFa;
-        tempTransfer[i+2] = (unsigned char)max(((i-36000)/400),0)&0xFF;//0x00;
-        tempTransfer[i+3] = (unsigned char)max(((i-8000)/400),0)&0xFF;//0xFF;
-        */
+//        //tempTransfer[i+3] = (unsigned char) ((int) (neutZone*max(fx-0.08, 0.0)*0.03*255))&0xFF; // latest
+//        //tempTransfer[i+3] = (unsigned char) (int) (min(max(fx-0.25, 0.0)*max((fy)+0.25,0.0), 1.0)*0.5*255)&0xFF;//0xFF;
 
-    }
+//        //rad = sqrt(pow((fx-1.0),2) + pow((fy-1.0),2));
+//        //tempTransfer[i+3] = (unsigned char) ((int) (((1.0-rad)*0.05)*255))&0xFF;
+//        //tempTransfer[i+3] = (unsigned char)max(((i-8000)/400),0)&0xFF;//0xFF;
 
+//        /*
+//        tempTransfer[i] = (unsigned char)max(((i-2000)/400),0)&0xFF;//0x00;
+//        tempTransfer[i+1] = (unsigned char)max(((i-8000)/400),0)&0xFF;//0xFa;
+//        tempTransfer[i+2] = (unsigned char)max(((i-36000)/400),0)&0xFF;//0x00;
+//        tempTransfer[i+3] = (unsigned char)max(((i-8000)/400),0)&0xFF;//0xFF;
+//        */
+
+//    }
+
+//    transferFunction = new Texture();
+//    transferFunction->create(GL_TEXTURE_2D, GL_RGBA8, wh[0], wh[1], GL_RGBA, GL_UNSIGNED_BYTE, tempTransfer);
+//    transferFunction->setTexParameters(GL_CLAMP,GL_CLAMP,GL_CLAMP,GL_LINEAR,GL_LINEAR);
+
+//    delete [] tempTransfer;
+//    tempTransfer = 0;
+
+//    errorCheckFunc(__FILE__, __LINE__);
+
+    QImage t ("tf/transfer.png");
+    t = QGLWidget::convertToGLFormat( t );
+
+    //Texture tex;
     transferFunction = new Texture();
-    transferFunction->create(GL_TEXTURE_2D, GL_RGBA8, wh[0], wh[1], GL_RGBA, GL_UNSIGNED_BYTE, tempTransfer);
+    transferFunction->create(GL_TEXTURE_2D, GL_RGBA8, wh[0], wh[1], GL_RGBA, GL_UNSIGNED_BYTE, t.bits());
     transferFunction->setTexParameters(GL_CLAMP,GL_CLAMP,GL_CLAMP,GL_LINEAR,GL_LINEAR);
 
-    delete [] tempTransfer;
-    tempTransfer = 0;
 
-    errorCheckFunc(__FILE__, __LINE__);
+    //tex.create(GL_TEXTURE_2D, GL_RGBA, w, h, GL_RGBA, GL_UNSIGNED_BYTE, map);
+
+
 }
 
 void volWidget::initializeTransferFunction(){
@@ -331,6 +346,59 @@ void volWidget::resetTransferFunction(int a, int b, int c, int d){
 
 }
 
+void volWidget::reset2DTransferFunction(int a, int b, int c, int d){
+//    int textureSize = wh[0]*wh[1]*4;
+//    GLubyte* tempTransfer = new GLubyte[textureSize];
+
+//    int x,y, qI;
+//    float fx, fy, rad, neutZone, maxRad;
+//    maxRad = sqrt(2.0);
+//    for (int i = 0; i < textureSize; i+=4){
+//        qI = i/4;
+//        y = (qI/wh[0]);
+//        x = qI-(y*wh[0]);
+//        fx = (float) (x/(wh[0]*1.0));
+//        fy = (float) (y/(wh[1]*1.0));
+
+//        //neutZone = max((0.08*sqrt(pow((fx),2) + pow((fy),2))), 0.0);
+//        neutZone = sqrt(pow((fx),2) + pow((fy),2));
+//        neutZone = max(neutZone-0.08, 0.0);
+//        neutZone = min(neutZone, (float)1.0);
+//        neutZone = neutZone;
+
+//        rad = sin(sqrt(pow((fx-1.0),2) + pow((fy),2)));
+//        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
+//        rad = min(rad, (float)1.0);
+//        tempTransfer[i] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
+
+//        rad = cos(sqrt(pow((fx-1.0),2) + pow((fy-0.25),2)));
+//        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
+//        rad = min(rad, (float)1.0);
+//        tempTransfer[i+1] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
+
+//        rad = sqrt(pow((fx-1.0),2) + pow((fy-0.5),2));
+//        //rad = rad + sqrt(pow((fx-0.5),2) + pow((fy-0.5),2));
+//        rad = min(rad, (float)1.0);
+//        tempTransfer[i+2] = (unsigned char) ((int) ((1.0-rad)*neutZone*255))&0xFF;
+
+
+//        rad = sqrt(pow((fx-1.0),2) + pow((fy-0.5),2));
+//        rad = min(rad, (float)1.0);
+//        tempTransfer[i+3] = (unsigned char) (int) ((1.0-rad)*max(((1.0-fx)-0.2),0.0)*0.5*255)&0xFF;
+
+//    }
+
+//    transferFunction = new Texture();
+//    transferFunction->create(GL_TEXTURE_2D, GL_RGBA8, wh[0], wh[1], GL_RGBA, GL_UNSIGNED_BYTE, tempTransfer);
+//    transferFunction->setTexParameters(GL_CLAMP,GL_CLAMP,GL_CLAMP,GL_LINEAR,GL_LINEAR);
+
+//    delete [] tempTransfer;
+//    tempTransfer = 0;
+
+//    errorCheckFunc(__FILE__, __LINE__);
+
+}
+
 void volWidget::initializeJitteringTexture(){
     int size = this->width();
     unsigned char* values = new unsigned char[size*size];
@@ -347,16 +415,19 @@ void volWidget::initializeJitteringTexture(){
 
 void volWidget::paintGL(void) {
 
+    //QTime timer;
+
+    if (framecount == 0) time->restart();
     makeCurrent();
-    fps = 1000/(time->restart()+1);
-    //cout<<fps<<" - ";
+    //spf = time->msec();
+    //spf = time->restart();//1000/(time->restart()+1);
+    //cout<<spf<<" - ";
     glClearColor(1.0,1.0,1.0,1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     errorCheckFunc(__FILE__, __LINE__);
 
     draw();
-
 }
 
 void volWidget::draw(void)
@@ -394,7 +465,17 @@ void volWidget::draw(void)
 
     shader->disable();
 
-    errorCheckFunc(__FILE__, __LINE__);
+    //errorCheckFunc(__FILE__, __LINE__);
+
+    framecount++;
+
+    //glFinish();
+    if (framecount == 1000){
+        cout << "ms =" << time->elapsed() << endl;
+        framecount = 0;
+    }
+
+    //update();
 }
 
 void volWidget::mousePressEvent(QMouseEvent *event){
@@ -414,8 +495,8 @@ void volWidget::mouseReleaseEvent(QMouseEvent *event){
         trackballs[tBallIndex]->endRotation();
         trackballs[tBallIndex]->setInitialRotationPosition(screenPos);
 
-        if (tBallIndex == 1)
-            cout<<endl<< lightTrackball->getViewMatrix().linear()*Eigen::Vector3f(0.0,0.0,1.0) <<endl;
+        //if (tBallIndex == 1)
+            //cout<<endl<< lightTrackball->getViewMatrix().linear()*Eigen::Vector3f(0.0,0.0,1.0) <<endl;
     }
 }
 
@@ -460,8 +541,16 @@ void volWidget::keyPressEvent(QKeyEvent *keyevent){
     }
     ///Reset Transfer Function
     if (keyevent->key() == Qt::Key_F6){
-        resetTransferFunction(8, 64, 240, 256);
+        transferFunction->unbind();
+        delete transferFunction;
+
+        string tfLocation = "tf/transfer.raw";
+        int* tfRes = new int[2];
+        tfRes[0] = 100; tfRes[1] = 100;
+        load2DTransferFunction(tfLocation, tfRes);
         cout << "F6 pressed, reseting transfer function...";
+
+        TFid = transferFunction->bind();
     }
     ///Enable light rotation
     if (keyevent->key() == Qt::Key_Control){
