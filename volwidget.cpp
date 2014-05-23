@@ -39,13 +39,13 @@ void volWidget::initialize() {
 //    dimension << 1.0, 1.0, 1.0;
 //    volume = new Volume("datasets/neghip64x64x64x1.raw",size, dimension);
 
- //   int* size = new int[3];
- //   size[0] = 256; size[1] = 256; size[2] = 256;
- //  Eigen::Vector3f  dimension;
- //  dimension << 1.0, 1.0, 1.0;
- //   volume = new Volume("datasets/bonsai256x1.raw",size, dimension);
+    int* size = new int[3];
+    size[0] = 256; size[1] = 256; size[2] = 256;
+   Eigen::Vector3f  dimension;
+   dimension << 1.0, 1.0, 1.0;
+    volume = new Volume("datasets/skull256x1.raw",size, dimension);
 
-/**/
+/*
     int* size = new int[3];
     size[0] = 301; size[1] = 324; size[2] = 56;
     //size[0] = 324; size[1] = 301; size[2] = 56;
